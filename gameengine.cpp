@@ -24,8 +24,8 @@ void GameEngine::onTimerTick() {
         emit isGameOverChanged(); // Сигнализируем QML, что управление пора заблочить
         m_timer->stop();
 
-        // Проверяем, вернулся ли игрок в ЗОНУ (координаты safeZone: x=175, y=330, w=50, h=50)
-        if (checkCollision(m_playerX, m_playerY, 175, 330, 50, 50)) {
+        // Проверяем, вернулся ли игрок в ЗОНУ
+        if (checkCollision(m_playerX, m_playerY, m_safeZoneGeometry[0], m_safeZoneGeometry[1], m_safeZoneGeometry[2], m_safeZoneGeometry[3])) {
             m_gameStatus = "ВЫ ВЫИГРАЛИ! Успели в зону!";
         } else {
             m_gameStatus = "ИГРА ОКОНЧЕНА! Не успели в зону!";
@@ -40,26 +40,25 @@ void GameEngine::handleKeyPress(const QString &key) {
 
     int nextX = m_playerX;
     int nextY = m_playerY;
-    int step = 20; // Шаг вора в пикселях
 
     // Сравниваем строки на чистом C++
-    if (key == "Left")  { nextX -= step; }
-    if (key == "Right") { nextX += step; }
-    if (key == "Up")    { nextY -= step; }
-    if (key == "Down")  { nextY += step; }
+    if (key == "Left")  { nextX -= m_playerStep; }
+    if (key == "Right") { nextX += m_playerStep; }
+    if (key == "Up")    { nextY -= m_playerStep; }
+    if (key == "Down")  { nextY += m_playerStep; }
 
-    // Проверяем столкновение со СТЕНОЙ (координаты wall: x=150, y=50, w=50, h=200)
-    if (!checkCollision(nextX, nextY, 150, 50, 50, 200)) {
+    // Проверяем столкновение со СТЕНОЙ
+    if (!checkCollision(nextX, nextY, m_wallGeometry[0], m_wallGeometry[1], m_wallGeometry[2], m_wallGeometry[3])) {
         // Если впереди нет стены, ограничиваем движение в рамках карты 800х800 (Clamp)
         // Игрок упрется в края экрана, но не вылетит за них
-        m_playerX = std::max(0, std::min(nextX, 800 - 16));
-        m_playerY = std::max(0, std::min(nextY, 800 - 16));
+        m_playerX = std::max(0, std::min(nextX, m_mapSize - m_playerSize));
+        m_playerY = std::max(0, std::min(nextY, m_mapSize - m_playerSize));
 
         emit playerPositionChanged(); // Выстреливаем сигнал, и вор плавно плывет в UI
     }
 
-    // Проверяем касание ДВЕРИ (координаты door: x=300, y=150, w=20, h=60)
-    if (checkCollision(m_playerX, m_playerY, 300, 150, 20, 60)) {
+    // Проверяем касание ДВЕРИ
+    if (checkCollision(m_playerX, m_playerY, m_doorGeometry[0], m_doorGeometry[1], m_doorGeometry[2], m_doorGeometry[3])) {
         m_doorLocked = false;
         m_gameStatus = "Дверь взята! Срочно беги назад в ЗОНУ!";
 
@@ -72,7 +71,7 @@ void GameEngine::handleKeyPress(const QString &key) {
 bool GameEngine::checkCollision(int nx, int ny, int ox, int oy, int ow, int oh) {
     // Чистая геометрия: игрок имеет размеры 16х16 пикселей
     return (nx < ox + ow &&
-            nx + 16 > ox &&
+            nx + m_playerSize > ox &&
             ny < oy + oh &&
-            ny + 16 > oy);
+            ny + m_playerSize > oy);
 }

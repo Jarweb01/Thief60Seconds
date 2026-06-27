@@ -14,13 +14,13 @@ Row {
         color: "#f1c40f"
         font.pixelSize: 18
         font.bold: true
-        anchors.verticalCenter: parent
+        anchors.verticalCenter: parent.verticalCenter
     }
 
     Text {
         text: header.status
         color: "white"
         font.pixelSize: 12
-        anchors.verticalCenter: parent
+        anchors.verticalCenter: parent.verticalCenter
     }
 }

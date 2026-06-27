@@ -29,19 +29,28 @@ Window {
         // БЕЗОПАСНАЯ ЗОНА
         SafeZone {
             id: safeZone
-            x: 175; y: 330; width: 50; height: 50
+            x: gameEngine.safeZoneX
+            y: gameEngine.safeZoneY
+            width: gameEngine.safeZoneWidth
+            height: gameEngine.safeZoneHeight
         }
 
         // СТЕНА
         Wall {
             id: wall
-            x: 150; y: 50; width: 50; height: 200
+            x: gameEngine.wallX
+            y: gameEngine.wallY
+            width: gameEngine.wallWidth
+            height: gameEngine.wallHeight
         }
 
         // ДВЕРЬ
         Door {
             id: door
-            x: 300; y: 150; width: 20; height: 60
+            x: gameEngine.doorX
+            y: gameEngine.doorY
+            width: gameEngine.doorWidth
+            height: gameEngine.doorHeight
             isLocked: gameEngine.doorLocked
         }
 
