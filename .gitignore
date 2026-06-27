@@ -1,0 +1,11 @@
+# Папка со скомпилированным бинарным мусором
+build/
+
+# Персональные настройки Qt Creator (пути к локальным компиляторам)
+*.CMakeLists.txt.user
+CMakeLists.txt.user
+
+# Временные файлы линтера и кэша
+.cmake/
+CMakeCache.txt
+CMakeFiles/

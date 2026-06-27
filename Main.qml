@@ -1,0 +1,62 @@
+import QtQuick
+
+Window {
+    id: root
+    width: 800
+    height: 800
+    visible: true
+    title: "2D Прототип за 60 секунд"
+    color: "#1e1e1e"
+
+    // ВЕРХНЯЯ ПАНЕЛЬ СЧЕТЧИКА
+    GameHeader {
+        id: header
+        anchors.top: parent.top
+        anchors.horizontalCenter: parent.horizontalCenter
+        time: gameEngine.timeLeft       // Передаем стейт времени
+        status: gameEngine.gameStatus   // Передаем стейт статуса
+    }
+
+    // Карта (Игровое поле)
+    Item {
+        id: map
+        anchors.top: header.bottom
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        focus: true
+
+        // БЕЗОПАСНАЯ ЗОНА
+        SafeZone {
+            id: safeZone
+            x: 175; y: 330; width: 50; height: 50
+        }
+
+        // СТЕНА
+        Wall {
+            id: wall
+            x: 150; y: 50; width: 50; height: 200
+        }
+
+        // ДВЕРЬ
+        Door {
+            id: door
+            x: 300; y: 150; width: 20; height: 60
+            isLocked: gameEngine.doorLocked
+        }
+
+        Player {
+            id: player
+            x: gameEngine.playerX
+            y: gameEngine.playerY
+        }
+
+        // Логика управления (чистый JS)
+        Keys.onPressed: (event) => {
+            if (event.key === Qt.Key_Left)  { gameEngine.handleKeyPress("Left") }
+            if (event.key === Qt.Key_Right) { gameEngine.handleKeyPress("Right") }
+            if (event.key === Qt.Key_Up)    { gameEngine.handleKeyPress("Up") }
+            if (event.key === Qt.Key_Down)  { gameEngine.handleKeyPress("Down") }
+        }
+    }
+}
