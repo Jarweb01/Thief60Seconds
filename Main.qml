@@ -28,9 +28,9 @@ Window {
 
         GameGrid {}
 
-        // БЕЗОПАСНАЯ ЗОНА
-        SafeZone {
-            id: safeZone
+        // Машина
+        Car {
+            id: car
             x: gameEngine.safeZoneX
             y: gameEngine.safeZoneY
             width: gameEngine.safeZoneWidth

@@ -1,7 +1,7 @@
 import QtQuick
 
 Rectangle {
-    id: safeZone
+    id: car
     color: "transparent"
     border.color: "#3498db"
     border.width: 2

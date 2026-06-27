@@ -23,7 +23,7 @@ qt_add_qml_module(appThief60Seconds
         Player.qml
         Wall.qml
         Door.qml
-        SafeZone.qml
+        Car.qml
         GameHeader.qml
         Safe.qml
 )
