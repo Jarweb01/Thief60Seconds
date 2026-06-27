@@ -66,6 +66,20 @@ void GameEngine::handleKeyPress(const QString &key) {
     if (key == "Up")    { nextY -= m_playerStep; }
     if (key == "Down")  { nextY += m_playerStep; }
 
+    // 1. ПРОВЕРКА СЕЙФА (Действует как стена + триггер взлома)
+    // Проверяем, натыкается ли СЛЕДУЮЩИЙ шаг вора на координаты сейфа
+    if(checkCollision(nextX, nextY, m_safeGeometry[0], m_safeGeometry[1], m_safeGeometry[2], m_safeGeometry[3])) {
+
+        // Если сейф ещё не был взломан — взламываем!
+        if(!m_safeLooted){
+            m_safeLooted = true;
+
+            emit safeLootedChanged();
+        }
+
+        return;
+    }
+
     // Проверяем столкновение со СТЕНОЙ
     bool hitAnyWall = false;
     // Циклом проверяем столкновение с каждой из 4 стен комнаты

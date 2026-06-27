@@ -53,6 +53,7 @@ class GameEngine : public QObject {
     Q_PROPERTY(int safeY READ safeY CONSTANT)
     Q_PROPERTY(int safeWidth READ safeWidth CONSTANT)
     Q_PROPERTY(int safeHeight READ safeHeight CONSTANT)
+    Q_PROPERTY(bool safeLooted READ safeLooted NOTIFY safeLootedChanged)
 
 
 public:
@@ -88,6 +89,7 @@ public:
     int safeY() const      { return m_safeGeometry[1]; }
     int safeWidth() const  { return m_safeGeometry[2]; }
     int safeHeight() const { return m_safeGeometry[3]; }
+    bool safeLooted() const { return m_safeLooted; }
 
 
     // Этот макрос разрешает вызывать метод C++ прямо из QML-кода кнопок
@@ -100,6 +102,7 @@ signals:
     void doorLockedChanged();
     void gameStatusChanged();
     void playerPositionChanged();
+    void safeLootedChanged();
 
 private slots:
     void onTimerTick(); // Метод для обработки тика секундного таймера
@@ -131,6 +134,9 @@ private:
     };
 
     int m_doorGeometry[4] = {7_grid, 4_grid, 1_grid, static_cast<int>(1_grid * 0.4)};
+
+    // Safe
+    bool m_safeLooted = false;
     int m_safeGeometry[4] = {5_grid, 6_grid,  1_grid, 1_grid};
 
 

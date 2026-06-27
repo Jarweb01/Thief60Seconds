@@ -74,6 +74,7 @@ Window {
             y: gameEngine.safeY
             width: gameEngine.safeWidth
             height: gameEngine.safeHeight
+            isLooted: gameEngine.safeLooted
         }
 
         Player {
