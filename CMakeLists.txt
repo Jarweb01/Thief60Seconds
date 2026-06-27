@@ -19,6 +19,7 @@ qt_add_qml_module(appThief60Seconds
     VERSION 1.0
     QML_FILES
         Main.qml
+        GameGrid.qml
         Player.qml
         Wall.qml
         Door.qml

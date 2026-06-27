@@ -26,6 +26,8 @@ Window {
         anchors.right: parent.right
         focus: true
 
+        GameGrid {}
+
         // БЕЗОПАСНАЯ ЗОНА
         SafeZone {
             id: safeZone

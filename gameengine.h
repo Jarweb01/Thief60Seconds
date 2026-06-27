@@ -3,6 +3,12 @@
 #include <QTimer>
 #include <QString>
 
+// Оператор кастомного литерала. Теперь суффикс _grid будет автоматически умножать число на 50
+constexpr int operator"" _grid(unsigned long long int cells) {
+    return cells * 50;
+}
+
+
 class GameEngine : public QObject {
     Q_OBJECT // Обязательный макрос Qt для работы реактивности
 
@@ -12,6 +18,7 @@ class GameEngine : public QObject {
     Q_PROPERTY(bool doorLocked READ doorLocked NOTIFY doorLockedChanged)
     Q_PROPERTY(QString gameStatus READ gameStatus NOTIFY gameStatusChanged)
     Q_PROPERTY(int moveDuration READ moveDuration CONSTANT)
+    Q_PROPERTY(int gridSize READ gridSize CONSTANT)
 
     // Координаты игрока теперь хранятся в C++
     Q_PROPERTY(int playerX READ playerX NOTIFY playerPositionChanged)
@@ -53,6 +60,7 @@ public:
     int playerX() const { return m_playerX; }
     int playerY() const { return m_playerY; }
     int moveDuration() const { return m_moveDuration; }
+    int gridSize() const { return m_gridSize; }
 
     // Геттеры для Стены
     int wallX() const { return m_wallGeometry[0]; }
@@ -96,27 +104,27 @@ private slots:
 
 private:
     // Внутреннее состояние игры (State)
-    int m_timeLeft;
+    int m_timeLeft; // Инициализируется рандомом в .cpp
     bool m_isGameOver = false;
     bool m_doorLocked = true;
     QString m_gameStatus = "Доберись до ДВЕРИ и вернись в ЗОНУ!";
+    const int m_gridSize = 50;
 
-    int m_playerX = 392;
+    int m_playerX = 365;
     int m_playerY = 717;
 
-    int m_wallGeometry[4] = {200, 500, 400, 30};
-    int m_doorGeometry[4] = {390, 200, 20, 60};
-    int m_safeZoneGeometry[4] = {375, 700, 50, 50};
-    int m_safeGeometry[4] = {150, 200, 40, 40}; // x=150, y=200, ширина=40, высота=40
+    int m_wallGeometry[4] = {4_grid, 10_grid, 8_grid, static_cast<int>(1_grid * 0.6)};
+    int m_doorGeometry[4] = {8_grid, 4_grid, static_cast<int>(1_grid * 0.4), static_cast<int>(1_grid * 1.1)};
+    int m_safeZoneGeometry[4] = {7_grid, 14_grid, 2_grid, 1_grid};
+    int m_safeGeometry[4] = {3_grid, 4_grid,  1_grid, 1_grid};
 
 
     // Константы размеров
-    int m_playerStep = 50;
+    int m_playerStep = 1_grid;
     const int m_moveDuration = 300; // Скорость шага в миллисекундах
 
-    const int m_mapSize = 800;   // Размер игрового поля
-    const int m_playerSize = 16; // Размер кубика вора (ширина и высота)
-
+    const int m_mapSize = 1_grid * 16;   // Размер игрового поля
+    const int m_playerSize = 1_grid * 0.3; // Размер кубика вора (ширина и высота)
 
     bool m_isMoving = false;
     QTimer *m_moveCooldownTimer; // Таймер блокировки кнопок на время анимации
