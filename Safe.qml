@@ -2,7 +2,7 @@ import QtQuick
 
 Rectangle {
     id: safe
-    color: "#d35400" // Коричневый цвет сейфа
+    color: "#7f8c8d" // Коричневый цвет сейфа
 
     Text {
         text: "СЕЙФ"

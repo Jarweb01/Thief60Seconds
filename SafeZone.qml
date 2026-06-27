@@ -7,7 +7,7 @@ Rectangle {
     border.width: 2
 
     Text {
-        text: "ЗОНА"
+        text: "АВТО"
         color: "#3498db"
         anchors.centerIn: parent
         font.pixelSize: 10

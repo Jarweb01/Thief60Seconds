@@ -115,23 +115,23 @@ private:
 
     int m_playerX = 365;
     int m_playerY = 717;
+    int m_safeZoneGeometry[4] = {7_grid, 14_grid, 2_grid, 1_grid};
 
     // std::vector позволяет добавлять сколько угодно стен, размер вычисляется динамически!
     std::vector<WallData> m_wallsLayout = {
         // Внешние стены здания (комната)
-        { 4_grid, 4_grid,  8_grid, 30 },     // Верх
+        { 4_grid, 4_grid,  3_grid, 30 },     // Верх
+        { 8_grid, 4_grid,  4_grid, 30 },     // Верх
         { 4_grid, 4_grid,  30,     7_grid }, // Лево
-        { 12_grid, 4_grid, 30,     7_grid }, // Право
+        { 12_grid, 4_grid, 30,     7_grid + 30}, // Право
         { 4_grid, 11_grid, 8_grid, 30 },     // Низ
 
         // ВНУТРЕННИЕ ПЕРЕГОРОДКИ (Добавили одной строчкой!)
-        { 8_grid, 4_grid,  30,     4_grid }  // Внутренняя стена посреди комнаты
+        { 8_grid, 8_grid,  4_grid,    15 }  // Внутренняя стена посреди комнаты
     };
 
-
-    int m_doorGeometry[4] = {8_grid, 4_grid, static_cast<int>(1_grid * 0.4), static_cast<int>(1_grid * 1.1)};
-    int m_safeZoneGeometry[4] = {7_grid, 14_grid, 2_grid, 1_grid};
-    int m_safeGeometry[4] = {3_grid, 4_grid,  1_grid, 1_grid};
+    int m_doorGeometry[4] = {7_grid, 4_grid, 1_grid, static_cast<int>(1_grid * 0.4)};
+    int m_safeGeometry[4] = {5_grid, 6_grid,  1_grid, 1_grid};
 
 
     // Константы размеров

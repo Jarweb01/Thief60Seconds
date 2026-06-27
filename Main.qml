@@ -6,7 +6,7 @@ Window {
     height: 800
     visible: true
     title: "2D Прототип за 60 секунд"
-    color: "#1e1e1e"
+    color: "#1a252f"
 
     // ВЕРХНЯЯ ПАНЕЛЬ СЧЕТЧИКА
     GameHeader {
