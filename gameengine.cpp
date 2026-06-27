@@ -105,16 +105,14 @@ void GameEngine::handleKeyPress(const QString &key) {
     // Проверяем касание ДВЕРИ
     if (checkCollision(m_playerX, m_playerY, m_doorGeometry[0], m_doorGeometry[1], m_doorGeometry[2], m_doorGeometry[3])) {
         m_doorLocked = false;
-        m_gameStatus = "Дверь взята! Срочно беги назад в ЗОНУ!";
 
         emit doorLockedChanged(); // Дверь в QML мгновенно зеленеет
-        emit gameStatusChanged(); // Текст хедера обновляется
     }
 }
 
 // 4. МАТЕМАТИКА КОЛЛИЗИЙ (AABB столкновение прямоугольников)
 bool GameEngine::checkCollision(int nx, int ny, int ox, int oy, int ow, int oh) {
-    // Чистая геометрия: игрок имеет размеры 16х16 пикселей
+    // Чистая геометрия
     return (nx < ox + ow &&
             nx + m_playerSize > ox &&
             ny < oy + oh &&

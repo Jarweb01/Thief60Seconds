@@ -113,7 +113,7 @@ private:
     int m_timeLeft; // Инициализируется рандомом в .cpp
     bool m_isGameOver = false;
     bool m_doorLocked = true;
-    QString m_gameStatus = "Доберись до ДВЕРИ и вернись в ЗОНУ!";
+    QString m_gameStatus = "Доберись до СЕЙФА и вернись к МАШИНЕ!";
     const int m_gridSize = 50;
 
     int m_playerX = 365;
