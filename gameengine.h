@@ -34,6 +34,13 @@ class GameEngine : public QObject {
     Q_PROPERTY(int safeZoneWidth READ safeZoneWidth CONSTANT)
     Q_PROPERTY(int safeZoneHeight READ safeZoneHeight CONSTANT)
 
+    // Мосты для Сейфа
+    Q_PROPERTY(int safeX READ safeX CONSTANT)
+    Q_PROPERTY(int safeY READ safeY CONSTANT)
+    Q_PROPERTY(int safeWidth READ safeWidth CONSTANT)
+    Q_PROPERTY(int safeHeight READ safeHeight CONSTANT)
+
+
 public:
     explicit GameEngine(QObject *parent = nullptr);
 
@@ -63,6 +70,13 @@ public:
     int safeZoneWidth() const { return m_safeZoneGeometry[2]; }
     int safeZoneHeight() const { return m_safeZoneGeometry[3]; }
 
+    // Геттеры для Сейфа
+    int safeX() const      { return m_safeGeometry[0]; }
+    int safeY() const      { return m_safeGeometry[1]; }
+    int safeWidth() const  { return m_safeGeometry[2]; }
+    int safeHeight() const { return m_safeGeometry[3]; }
+
+
     // Этот макрос разрешает вызывать метод C++ прямо из QML-кода кнопок
     Q_INVOKABLE void handleKeyPress(const QString &key);
 
@@ -90,6 +104,8 @@ private:
     int m_wallGeometry[4] = {200, 500, 400, 30};
     int m_doorGeometry[4] = {390, 200, 20, 60};
     int m_safeZoneGeometry[4] = {375, 700, 50, 50};
+    int m_safeGeometry[4] = {150, 200, 40, 40}; // x=150, y=200, ширина=40, высота=40
+
 
     // Константы размеров
     int m_playerStep = 20;

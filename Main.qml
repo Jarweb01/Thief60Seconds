@@ -54,6 +54,15 @@ Window {
             isLocked: gameEngine.doorLocked
         }
 
+        // СЕЙФ С ДОБЫЧЕЙ
+        Safe {
+            id: safe
+            x: gameEngine.safeX
+            y: gameEngine.safeY
+            width: gameEngine.safeWidth
+            height: gameEngine.safeHeight
+        }
+
         Player {
             id: player
             x: gameEngine.playerX

@@ -24,6 +24,7 @@ qt_add_qml_module(appThief60Seconds
         Door.qml
         SafeZone.qml
         GameHeader.qml
+        Safe.qml
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
