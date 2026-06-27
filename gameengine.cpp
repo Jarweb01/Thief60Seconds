@@ -1,6 +1,7 @@
 #include "gameengine.h"
 #include <algorithm> // Нужен для функций std::max и std::min (ограничители движения)
 #include <random>
+#include <QVariantMap>
 
 // 1. КОНСТРУКТОР: вызывается в момент создания игры в памяти
 GameEngine::GameEngine(QObject *parent) : QObject(parent) {
@@ -66,17 +67,25 @@ void GameEngine::handleKeyPress(const QString &key) {
     if (key == "Down")  { nextY += m_playerStep; }
 
     // Проверяем столкновение со СТЕНОЙ
-    if (!checkCollision(nextX, nextY, m_wallGeometry[0], m_wallGeometry[1], m_wallGeometry[2], m_wallGeometry[3])) {
-        // Если впереди нет стены, ограничиваем движение в рамках карты 800х800 (Clamp)
-        // Игрок упрется в края экрана, но не вылетит за них
+    bool hitAnyWall = false;
+    // Циклом проверяем столкновение с каждой из 4 стен комнаты
+    for (size_t i = 0; i < m_wallsLayout.size(); ++i) {
+        if (checkCollision(nextX, nextY, m_wallsLayout[i].x, m_wallsLayout[i].y, m_wallsLayout[i].w, m_wallsLayout[i].h)) {
+            hitAnyWall = true;
+            break;
+        }
+    }
+
+    // Если впереди чисто — двигаемся
+    if (!hitAnyWall) {
         m_playerX = std::max(0, std::min(nextX, m_mapSize - m_playerSize));
         m_playerY = std::max(0, std::min(nextY, m_mapSize - m_playerSize));
 
         // Если координаты реально изменились, включаем блокировку
         m_isMoving = true;             // Закрываем замок для кнопок
-        m_moveCooldownTimer->start(); // Запускаем отсчет 200 миллисекунд
+        m_moveCooldownTimer->start(); // Запускаем отсчет n миллисекунд
 
-        emit playerPositionChanged(); // Выстреливаем сигнал, и вор плавно плывет в UI
+        emit playerPositionChanged();
     }
 
     // Проверяем касание ДВЕРИ
@@ -102,3 +111,15 @@ void GameEngine::onMoveFinished() {
     m_isMoving = false; // Время анимации вышло, открываем замок для следующего шага!
 }
 
+QVariantList GameEngine::walls() const {
+    QVariantList list;
+    for (size_t i = 0; i < m_wallsLayout.size(); ++i) {
+        QVariantMap map;
+        map["x"] = m_wallsLayout[i].x;
+        map["y"] = m_wallsLayout[i].y;
+        map["w"] = m_wallsLayout[i].w;
+        map["h"] = m_wallsLayout[i].h;
+        list.append(map);
+    }
+    return list;
+}

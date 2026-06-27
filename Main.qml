@@ -37,6 +37,17 @@ Window {
             height: gameEngine.safeZoneHeight
         }
 
+        // Автоматическая отрисовка всех стен комнаты из C++ массива
+        Repeater {
+            model: gameEngine.walls
+            Wall {
+                x: modelData.x
+                y: modelData.y
+                width: modelData.w
+                height: modelData.h
+            }
+        }
+
         // СТЕНА
         Wall {
             id: wall

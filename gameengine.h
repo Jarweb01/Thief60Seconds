@@ -2,11 +2,20 @@
 #include <QObject>
 #include <QTimer>
 #include <QString>
+#include <QVariant>
+#include <vector>
 
 // Оператор кастомного литерала. Теперь суффикс _grid будет автоматически умножать число на 50
 constexpr int operator"" _grid(unsigned long long int cells) {
     return cells * 50;
 }
+
+struct WallData {
+    int x;
+    int y;
+    int w;
+    int h;
+};
 
 
 class GameEngine : public QObject {
@@ -24,11 +33,8 @@ class GameEngine : public QObject {
     Q_PROPERTY(int playerX READ playerX NOTIFY playerPositionChanged)
     Q_PROPERTY(int playerY READ playerY NOTIFY playerPositionChanged)
 
-    // Мосты для Стены
-    Q_PROPERTY(int wallX READ wallX CONSTANT)
-    Q_PROPERTY(int wallY READ wallY CONSTANT)
-    Q_PROPERTY(int wallWidth READ wallWidth CONSTANT)
-    Q_PROPERTY(int wallHeight READ wallHeight CONSTANT)
+    // Мосты для Стен
+    Q_PROPERTY(QVariantList walls READ walls CONSTANT)
 
     // Мосты для Двери
     Q_PROPERTY(int doorX READ doorX CONSTANT)
@@ -63,10 +69,7 @@ public:
     int gridSize() const { return m_gridSize; }
 
     // Геттеры для Стены
-    int wallX() const { return m_wallGeometry[0]; }
-    int wallY() const { return m_wallGeometry[1]; }
-    int wallWidth() const { return m_wallGeometry[2]; }
-    int wallHeight() const { return m_wallGeometry[3]; }
+    QVariantList walls() const;
 
     // Геттеры для Двери
     int doorX() const { return m_doorGeometry[0]; }
@@ -113,7 +116,19 @@ private:
     int m_playerX = 365;
     int m_playerY = 717;
 
-    int m_wallGeometry[4] = {4_grid, 10_grid, 8_grid, static_cast<int>(1_grid * 0.6)};
+    // std::vector позволяет добавлять сколько угодно стен, размер вычисляется динамически!
+    std::vector<WallData> m_wallsLayout = {
+        // Внешние стены здания (комната)
+        { 4_grid, 4_grid,  8_grid, 30 },     // Верх
+        { 4_grid, 4_grid,  30,     7_grid }, // Лево
+        { 12_grid, 4_grid, 30,     7_grid }, // Право
+        { 4_grid, 11_grid, 8_grid, 30 },     // Низ
+
+        // ВНУТРЕННИЕ ПЕРЕГОРОДКИ (Добавили одной строчкой!)
+        { 8_grid, 4_grid,  30,     4_grid }  // Внутренняя стена посреди комнаты
+    };
+
+
     int m_doorGeometry[4] = {8_grid, 4_grid, static_cast<int>(1_grid * 0.4), static_cast<int>(1_grid * 1.1)};
     int m_safeZoneGeometry[4] = {7_grid, 14_grid, 2_grid, 1_grid};
     int m_safeGeometry[4] = {3_grid, 4_grid,  1_grid, 1_grid};
@@ -124,7 +139,7 @@ private:
     const int m_moveDuration = 300; // Скорость шага в миллисекундах
 
     const int m_mapSize = 1_grid * 16;   // Размер игрового поля
-    const int m_playerSize = 1_grid * 0.3; // Размер кубика вора (ширина и высота)
+    const int m_playerSize = 16; // Размер кубика вора (ширина и высота)
 
     bool m_isMoving = false;
     QTimer *m_moveCooldownTimer; // Таймер блокировки кнопок на время анимации
