@@ -31,7 +31,7 @@ GameEngine::GameEngine(QObject *parent) : QObject(parent) {
     connect(m_moveCooldownTimer, &QTimer::timeout, this, &GameEngine::onMoveFinished);
 
     QTimer::singleShot(100, this, [this]() {
-        m_carX = 350;
+        m_carX = mapSize() / 2 - gridSize();
         emit carXChanged(); // Кидаем сигнал: координата carX изменилась
     });
 }
@@ -48,15 +48,23 @@ void GameEngine::onTimerTick() {
         emit isGameOverChanged(); // Сигнализируем QML, что управление пора заблочить
         m_timer->stop();
 
+        m_carState = 2;
+        m_carX = mapSize();
+
+        emit carStateChanged();
+        emit carXChanged();
+
+        m_isPlayerInTheCar = checkCollision(m_playerX, m_playerY, m_safeZoneGeometry[0], m_safeZoneGeometry[1], m_safeZoneGeometry[2], m_safeZoneGeometry[3]);
+
         // Проверяем, вернулся ли игрок к Машине
-        if (checkCollision(m_playerX, m_playerY, m_safeZoneGeometry[0], m_safeZoneGeometry[1], m_safeZoneGeometry[2], m_safeZoneGeometry[3])) {
-            m_carState = 2;
-            m_isMoving = true;
-            m_gameStatus = "ВЫ ВЫИГРАЛИ! Уезжайте!";
+        if (m_isPlayerInTheCar) {
+            m_gameStatus = "ВЫ ВЫИГРАЛИ!";
         } else {
-            m_gameStatus = "ИГРА ОКОНЧЕНА! Не успели уехать!";
+            m_gameStatus = "ИГРА ОКОНЧЕНА! Машина уехала, вы остались!";
         }
+
         emit gameStatusChanged(); // Обновляем текст статуса в UI
+        emit playerPositionChanged();
     }
 }
 
@@ -109,6 +117,8 @@ void GameEngine::handleKeyPress(const QString &key) {
         emit playerPositionChanged();
     }
 
+    m_isPlayerInTheCar = checkCollision(m_playerX, m_playerY, m_safeZoneGeometry[0], m_safeZoneGeometry[1], m_safeZoneGeometry[2], m_safeZoneGeometry[3]);
+
     // Проверяем касание ДВЕРИ
     if (checkCollision(m_playerX, m_playerY, m_doorGeometry[0], m_doorGeometry[1], m_doorGeometry[2], m_doorGeometry[3])) {
         m_doorLocked = false;
@@ -148,6 +158,8 @@ void GameEngine::onCarArrived() {
     qDebug() << "C++: 2 секунды истекли! Переключаем carState в 1!";
     m_carState = 1; // Переводим машину в режим ожидания (стоим)
     m_isMoving = false; // Разрешаем игроку ходить
+    m_isPlayerInTheCar = false;
     emit carStateChanged();
     emit playerPositionChanged();
+    emit isPlayerInTheCarChanged();
 }

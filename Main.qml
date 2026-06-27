@@ -33,7 +33,7 @@ Window {
             x: gameEngine.playerX
             y: gameEngine.playerY
 
-            opacity: gameEngine.carState === 1 ? 1 : 0
+            opacity: gameEngine.isPlayerInTheCar ? 0 : 1
 
             Behavior on opacity { NumberAnimation { duration: 100 } }
         }

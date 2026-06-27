@@ -28,6 +28,7 @@ class GameEngine : public QObject {
     Q_PROPERTY(QString gameStatus READ gameStatus NOTIFY gameStatusChanged)
     Q_PROPERTY(int moveDuration READ moveDuration CONSTANT)
     Q_PROPERTY(int gridSize READ gridSize CONSTANT)
+    Q_PROPERTY(bool isPlayerInTheCar READ isPlayerInTheCar NOTIFY isPlayerInTheCarChanged)
 
     // Координаты игрока теперь хранятся в C++
     Q_PROPERTY(int playerX READ playerX NOTIFY playerPositionChanged)
@@ -70,6 +71,8 @@ public:
     int playerY() const { return m_playerY; }
     int moveDuration() const { return m_moveDuration; }
     int gridSize() const { return m_gridSize; }
+    int mapSize() const { return m_mapSize; }
+    bool isPlayerInTheCar() const { return m_isPlayerInTheCar; }
 
     // Геттеры для Стены
     QVariantList walls() const;
@@ -110,6 +113,7 @@ signals:
     void safeLootedChanged();
     void carStateChanged();
     void carXChanged();
+    void isPlayerInTheCarChanged();
 
 public slots:
     void onCarArrived();
@@ -164,6 +168,9 @@ private:
     const int m_playerSize = 16; // Размер кубика вора (ширина и высота)
 
     bool m_isMoving = true;
+    bool m_isPlayerInTheCar = true;
+
+    // timers
     QTimer *m_moveCooldownTimer; // Таймер блокировки кнопок на время анимации
 
     QTimer *m_timer; // Плюсовый таймер
