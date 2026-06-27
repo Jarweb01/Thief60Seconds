@@ -28,16 +28,26 @@ Window {
 
         GameGrid {}
 
+        Player {
+            id: player
+            x: gameEngine.playerX
+            y: gameEngine.playerY
+
+            opacity: gameEngine.carState === 1 ? 1 : 0
+
+            Behavior on opacity { NumberAnimation { duration: 100 } }
+        }
+
         // Машина
         Car {
             id: car
-            x: gameEngine.safeZoneX
             y: gameEngine.safeZoneY
             width: gameEngine.safeZoneWidth
             height: gameEngine.safeZoneHeight
+            stateIndex: gameEngine.carState
         }
 
-        // Автоматическая отрисовка всех стен комнаты из C++ массива
+        // СТЕНЫ
         Repeater {
             model: gameEngine.walls
             Wall {
@@ -46,15 +56,6 @@ Window {
                 width: modelData.w
                 height: modelData.h
             }
-        }
-
-        // СТЕНА
-        Wall {
-            id: wall
-            x: gameEngine.wallX
-            y: gameEngine.wallY
-            width: gameEngine.wallWidth
-            height: gameEngine.wallHeight
         }
 
         // ДВЕРЬ
@@ -75,12 +76,6 @@ Window {
             width: gameEngine.safeWidth
             height: gameEngine.safeHeight
             isLooted: gameEngine.safeLooted
-        }
-
-        Player {
-            id: player
-            x: gameEngine.playerX
-            y: gameEngine.playerY
         }
 
         // Логика управления (чистый JS)

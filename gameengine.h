@@ -42,11 +42,13 @@ class GameEngine : public QObject {
     Q_PROPERTY(int doorWidth READ doorWidth CONSTANT)
     Q_PROPERTY(int doorHeight READ doorHeight CONSTANT)
 
-    // Мосты для Зоны
+    // Мосты для Машины
     Q_PROPERTY(int safeZoneX READ safeZoneX CONSTANT)
     Q_PROPERTY(int safeZoneY READ safeZoneY CONSTANT)
     Q_PROPERTY(int safeZoneWidth READ safeZoneWidth CONSTANT)
     Q_PROPERTY(int safeZoneHeight READ safeZoneHeight CONSTANT)
+    Q_PROPERTY(int carState READ carState NOTIFY carStateChanged)
+    Q_PROPERTY(int carX READ carX NOTIFY carXChanged)
 
     // Мосты для Сейфа
     Q_PROPERTY(int safeX READ safeX CONSTANT)
@@ -78,11 +80,14 @@ public:
     int doorWidth() const { return m_doorGeometry[2]; }
     int doorHeight() const { return m_doorGeometry[3]; }
 
-    // Геттеры для Зоны
+    // Геттеры для Машины
     int safeZoneX() const { return m_safeZoneGeometry[0]; }
     int safeZoneY() const { return m_safeZoneGeometry[1]; }
     int safeZoneWidth() const { return m_safeZoneGeometry[2]; }
     int safeZoneHeight() const { return m_safeZoneGeometry[3]; }
+    int carState() const { return m_carState; }
+    int carX() const { return m_carX; }
+
 
     // Геттеры для Сейфа
     int safeX() const      { return m_safeGeometry[0]; }
@@ -103,6 +108,11 @@ signals:
     void gameStatusChanged();
     void playerPositionChanged();
     void safeLootedChanged();
+    void carStateChanged();
+    void carXChanged();
+
+public slots:
+    void onCarArrived();
 
 private slots:
     void onTimerTick(); // Метод для обработки тика секундного таймера
@@ -116,9 +126,14 @@ private:
     QString m_gameStatus = "Доберись до СЕЙФА и вернись к МАШИНЕ!";
     const int m_gridSize = 50;
 
+    // Player
     int m_playerX = 365;
-    int m_playerY = 717;
+    int m_playerY = 667;
+
+    // Car
     int m_safeZoneGeometry[4] = {7_grid, 14_grid, 2_grid, 1_grid};
+    int m_carState = 0; // 0 - приезд, 1 - игра, 2 - побег
+    int m_carX = -20;
 
     // std::vector позволяет добавлять сколько угодно стен, размер вычисляется динамически!
     std::vector<WallData> m_wallsLayout = {
@@ -141,13 +156,14 @@ private:
 
 
     // Константы размеров
+    // Player
     int m_playerStep = 1_grid;
     const int m_moveDuration = 300; // Скорость шага в миллисекундах
 
     const int m_mapSize = 1_grid * 16;   // Размер игрового поля
     const int m_playerSize = 16; // Размер кубика вора (ширина и высота)
 
-    bool m_isMoving = false;
+    bool m_isMoving = true;
     QTimer *m_moveCooldownTimer; // Таймер блокировки кнопок на время анимации
 
     QTimer *m_timer; // Плюсовый таймер

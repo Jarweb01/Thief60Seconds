@@ -2,6 +2,7 @@
 #include <algorithm> // Нужен для функций std::max и std::min (ограничители движения)
 #include <random>
 #include <QVariantMap>
+#include <QDebug>
 
 // 1. КОНСТРУКТОР: вызывается в момент создания игры в памяти
 GameEngine::GameEngine(QObject *parent) : QObject(parent) {
@@ -29,6 +30,10 @@ GameEngine::GameEngine(QObject *parent) : QObject(parent) {
     m_moveCooldownTimer->setInterval(m_moveDuration);    // Блокировка на n миллисекунд (длительность шага)
     connect(m_moveCooldownTimer, &QTimer::timeout, this, &GameEngine::onMoveFinished);
 
+    QTimer::singleShot(100, this, [this]() {
+        m_carX = 350;
+        emit carXChanged(); // Кидаем сигнал: координата carX изменилась
+    });
 }
 
 // 2. СЕКУНДНЫЙ ТИК ТАЙМЕРА (асинхронно уменьшает время)
@@ -43,11 +48,13 @@ void GameEngine::onTimerTick() {
         emit isGameOverChanged(); // Сигнализируем QML, что управление пора заблочить
         m_timer->stop();
 
-        // Проверяем, вернулся ли игрок в ЗОНУ
+        // Проверяем, вернулся ли игрок к Машине
         if (checkCollision(m_playerX, m_playerY, m_safeZoneGeometry[0], m_safeZoneGeometry[1], m_safeZoneGeometry[2], m_safeZoneGeometry[3])) {
-            m_gameStatus = "ВЫ ВЫИГРАЛИ! Успели в зону!";
+            m_carState = 2;
+            m_isMoving = true;
+            m_gameStatus = "ВЫ ВЫИГРАЛИ! Уезжайте!";
         } else {
-            m_gameStatus = "ИГРА ОКОНЧЕНА! Не успели в зону!";
+            m_gameStatus = "ИГРА ОКОНЧЕНА! Не успели уехать!";
         }
         emit gameStatusChanged(); // Обновляем текст статуса в UI
     }
@@ -134,4 +141,13 @@ QVariantList GameEngine::walls() const {
         list.append(map);
     }
     return list;
+}
+
+
+void GameEngine::onCarArrived() {
+    qDebug() << "C++: 2 секунды истекли! Переключаем carState в 1!";
+    m_carState = 1; // Переводим машину в режим ожидания (стоим)
+    m_isMoving = false; // Разрешаем игроку ходить
+    emit carStateChanged();
+    emit playerPositionChanged();
 }
