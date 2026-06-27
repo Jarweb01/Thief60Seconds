@@ -1,8 +1,19 @@
 #include "gameengine.h"
 #include <algorithm> // Нужен для функций std::max и std::min (ограничители движения)
+#include <random>
 
 // 1. КОНСТРУКТОР: вызывается в момент создания игры в памяти
 GameEngine::GameEngine(QObject *parent) : QObject(parent) {
+    // 1. Инициализируем генератор случайных чисел
+    std::random_device rd;  // Получаем аппаратное случайное число для затравки
+    std::mt19937 gen(rd()); // Инициализируем стандартный генератор Вихрь Мерсенна
+
+    // 2. Задаем диапазон распределения
+    std::uniform_int_distribution<> distr(50, 60);
+
+    // 3. Присваиваем случайное число нашей переменной времени
+    m_timeLeft = distr(gen);
+
     m_timer = new QTimer(this); // Выделяем память под плюсовый таймер
     m_timer->setInterval(1000); // Задаем интервал тика в 1000 миллисекунд (1 секунда)
 
@@ -10,6 +21,13 @@ GameEngine::GameEngine(QObject *parent) : QObject(parent) {
     connect(m_timer, &QTimer::timeout, this, &GameEngine::onTimerTick);
 
     m_timer->start(); // Запускаем обратный отсчет таймера
+
+    // Настраиваем таймер кулдауна движения
+    m_moveCooldownTimer = new QTimer(this);
+    m_moveCooldownTimer->setSingleShot(true); // Таймер сработает ровно один раз за шаг
+    m_moveCooldownTimer->setInterval(m_moveDuration);    // Блокировка на n миллисекунд (длительность шага)
+    connect(m_moveCooldownTimer, &QTimer::timeout, this, &GameEngine::onMoveFinished);
+
 }
 
 // 2. СЕКУНДНЫЙ ТИК ТАЙМЕРА (асинхронно уменьшает время)
@@ -36,7 +54,7 @@ void GameEngine::onTimerTick() {
 
 // 3. ОБРАБОТКА НАЖАТИЯ КНОПОК (Вызывается из JS-кода в QML)
 void GameEngine::handleKeyPress(const QString &key) {
-    if (m_isGameOver) return; // Если игра завершена, кнопки не реагируют
+    if (m_isGameOver || m_isMoving) return;
 
     int nextX = m_playerX;
     int nextY = m_playerY;
@@ -53,6 +71,10 @@ void GameEngine::handleKeyPress(const QString &key) {
         // Игрок упрется в края экрана, но не вылетит за них
         m_playerX = std::max(0, std::min(nextX, m_mapSize - m_playerSize));
         m_playerY = std::max(0, std::min(nextY, m_mapSize - m_playerSize));
+
+        // Если координаты реально изменились, включаем блокировку
+        m_isMoving = true;             // Закрываем замок для кнопок
+        m_moveCooldownTimer->start(); // Запускаем отсчет 200 миллисекунд
 
         emit playerPositionChanged(); // Выстреливаем сигнал, и вор плавно плывет в UI
     }
@@ -75,3 +97,8 @@ bool GameEngine::checkCollision(int nx, int ny, int ox, int oy, int ow, int oh) 
             ny < oy + oh &&
             ny + m_playerSize > oy);
 }
+
+void GameEngine::onMoveFinished() {
+    m_isMoving = false; // Время анимации вышло, открываем замок для следующего шага!
+}
+

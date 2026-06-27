@@ -11,6 +11,7 @@ class GameEngine : public QObject {
     Q_PROPERTY(bool isGameOver READ isGameOver NOTIFY isGameOverChanged)
     Q_PROPERTY(bool doorLocked READ doorLocked NOTIFY doorLockedChanged)
     Q_PROPERTY(QString gameStatus READ gameStatus NOTIFY gameStatusChanged)
+    Q_PROPERTY(int moveDuration READ moveDuration CONSTANT)
 
     // Координаты игрока теперь хранятся в C++
     Q_PROPERTY(int playerX READ playerX NOTIFY playerPositionChanged)
@@ -51,6 +52,7 @@ public:
     QString gameStatus() const { return m_gameStatus; }
     int playerX() const { return m_playerX; }
     int playerY() const { return m_playerY; }
+    int moveDuration() const { return m_moveDuration; }
 
     // Геттеры для Стены
     int wallX() const { return m_wallGeometry[0]; }
@@ -90,10 +92,11 @@ signals:
 
 private slots:
     void onTimerTick(); // Метод для обработки тика секундного таймера
+    void onMoveFinished();
 
 private:
     // Внутреннее состояние игры (State)
-    int m_timeLeft = 20;
+    int m_timeLeft;
     bool m_isGameOver = false;
     bool m_doorLocked = true;
     QString m_gameStatus = "Доберись до ДВЕРИ и вернись в ЗОНУ!";
@@ -108,9 +111,15 @@ private:
 
 
     // Константы размеров
-    int m_playerStep = 20;
+    int m_playerStep = 50;
+    const int m_moveDuration = 300; // Скорость шага в миллисекундах
+
     const int m_mapSize = 800;   // Размер игрового поля
     const int m_playerSize = 16; // Размер кубика вора (ширина и высота)
+
+
+    bool m_isMoving = false;
+    QTimer *m_moveCooldownTimer; // Таймер блокировки кнопок на время анимации
 
     QTimer *m_timer; // Плюсовый таймер
 
