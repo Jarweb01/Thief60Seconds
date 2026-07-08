@@ -3,21 +3,15 @@
 #include <QTimer>
 #include <QString>
 #include <QVariant>
-#include <vector>
+// #include <vector>
 
 // Оператор кастомного литерала. Теперь суффикс _grid будет автоматически умножать число на 50
-constexpr int operator"" _grid(unsigned long long int cells) {
+constexpr int operator"" _gridSize(unsigned long long int cells) {
     return cells * 50;
 }
 
-struct WallData {
-    int x;
-    int y;
-    int w;
-    int h;
-};
-
 class Character;
+class GameMap;
 
 class GameEngine : public QObject {
     Q_OBJECT // Обязательный макрос Qt для работы реактивности
@@ -28,14 +22,13 @@ class GameEngine : public QObject {
     Q_PROPERTY(bool doorLocked READ doorLocked NOTIFY doorLockedChanged)
     Q_PROPERTY(QString gameStatus READ gameStatus NOTIFY gameStatusChanged)
     Q_PROPERTY(int moveDuration READ moveDuration CONSTANT)
-    Q_PROPERTY(int gridSize READ gridSize CONSTANT)
 
     // Координаты игрока
     Q_PROPERTY(Character* player READ player CONSTANT)
     // Q_PROPERTY(Character* assistant READ assistant CONSTANT)
 
     // Мосты для Стен
-    Q_PROPERTY(QVariantList walls READ walls CONSTANT)
+    Q_PROPERTY(GameMap* map READ map CONSTANT)
 
     // Мосты для Двери
     Q_PROPERTY(int doorX READ doorX CONSTANT)
@@ -61,11 +54,12 @@ class GameEngine : public QObject {
 
 public:
     explicit GameEngine(QObject *parent = nullptr);
-
     ~GameEngine() override;
 
     Character* player() const { return m_player; }
     // Character* assistant() const { return m_assistant; }
+
+    GameMap* map() const { return m_map; }
 
     // Геттеры для чтения данных из QML
     int timeLeft() const { return m_timeLeft; }
@@ -73,11 +67,7 @@ public:
     bool doorLocked() const { return m_doorLocked; }
     QString gameStatus() const { return m_gameStatus; }
     int moveDuration() const { return m_moveDuration; }
-    int gridSize() const { return m_gridSize; }
-    int mapSize() const { return m_mapSize; }
-
-    // Геттеры для Стены
-    QVariantList walls() const;
+    int mapSize() const;
 
     // Геттеры для Двери
     int doorX() const { return m_doorGeometry[0]; }
@@ -128,48 +118,34 @@ private:
     bool m_isGameOver = false;
     bool m_doorLocked = true;
     QString m_gameStatus = "Доберись до СЕЙФА и вернись к МАШИНЕ!";
-    const int m_gridSize = 50;
 
     // Car
-    int m_safeZoneGeometry[4] = {7_grid, 14_grid, 2_grid, 1_grid};
+    int m_safeZoneGeometry[4] = {7_gridSize, 14_gridSize, 2_gridSize, 1_gridSize};
     int m_carState = 0; // 0 - приезд, 1 - игра, 2 - побег
     int m_carX = -20;
 
-    // std::vector позволяет добавлять сколько угодно стен, размер вычисляется динамически!
-    std::vector<WallData> m_wallsLayout = {
-        // Внешние стены здания (комната)
-        { 4_grid, 4_grid,  3_grid, 30 },     // Верх
-        { 8_grid, 4_grid,  4_grid, 30 },     // Верх
-        { 4_grid, 4_grid,  30,     7_grid }, // Лево
-        { 12_grid, 4_grid, 30,     7_grid + 30}, // Право
-        { 4_grid, 11_grid, 8_grid, 30 },     // Низ
-
-        // ВНУТРЕННИЕ ПЕРЕГОРОДКИ (Добавили одной строчкой!)
-        { 8_grid, 8_grid,  4_grid,    15 }  // Внутренняя стена посреди комнаты
-    };
-
-    int m_doorGeometry[4] = {7_grid, 4_grid, 1_grid, static_cast<int>(1_grid * 0.4)};
+    int m_doorGeometry[4] = {7_gridSize, 4_gridSize, 1_gridSize, static_cast<int>(1_gridSize * 0.4)};
 
     // Safe
     bool m_safeLooted = false;
-    int m_safeGeometry[4] = {5_grid, 6_grid,  1_grid, 1_grid};
+    int m_safeGeometry[4] = {5_gridSize, 6_gridSize,  1_gridSize, 1_gridSize};
 
 
     // Константы размеров
     // Player
     Character* m_player = nullptr;
     // Character* m_assistant = nullptr;
-    int m_playerStep = 1_grid;
-    const int m_moveDuration = 300; // Скорость шага в миллисекундах
+    GameMap* m_map = nullptr;
 
-    const int m_mapSize = 1_grid * 16;   // Размер игрового поля
+    int m_playerStep;
+    const int m_moveDuration = 400; // Скорость шага в миллисекундах
+
     const int m_playerSize = 16; // Размер кубика вора (ширина и высота)
 
     bool m_isMoving = true;
 
     // timers
     QTimer *m_moveCooldownTimer; // Таймер блокировки кнопок на время анимации
-
     QTimer *m_timer; // Плюсовый таймер
 
     // Чистая C++ математика коллизий (AABB)

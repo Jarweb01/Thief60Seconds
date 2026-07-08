@@ -10,24 +10,26 @@ qt_standard_project_setup()
 
 qt_add_executable(appThief60Seconds
     main.cpp
-    gameengine.h
-    gameengine.cpp
-    Character.h
-    Character.cpp
+    src/gameengine.h
+    src/gameengine.cpp
+    src/Character.h
+    src/Character.cpp
+    src/GameMap.h
+    src/GameMap.cpp
 )
 
 qt_add_qml_module(appThief60Seconds
     URI Thief60Seconds
     VERSION 1.0
     QML_FILES
-        Main.qml
-        GameGrid.qml
-        Player.qml
-        Wall.qml
-        Door.qml
-        Car.qml
-        GameHeader.qml
-        Safe.qml
+        qml/entities/Main.qml
+        qml/entities/Player.qml
+        qml/entities/Wall.qml
+        qml/entities/Door.qml
+        qml/entities/Car.qml
+        qml/entities/Safe.qml
+        qml/components/GameGrid.qml
+        qml/components/GameHeader.qml
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.

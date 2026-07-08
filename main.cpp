@@ -1,7 +1,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext> // нужен для проброса C++ объектов в QML
-#include "gameengine.h"
+#include "src/gameengine.h"
 
 int main(int argc, char *argv[])
 {
@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("gameEngine", &gameEngine);
 
 
-    const QUrl url(QStringLiteral("qrc:/Thief60Seconds/Main.qml"));
+    const QUrl url(QStringLiteral("qrc:/Thief60Seconds/qml/entities/Main.qml"));
     QObject::connect(
         &engine,
         &QQmlApplicationEngine::objectCreationFailed,

@@ -1,4 +1,5 @@
 #include "gameengine.h"
+#include "GameMap.h"
 #include "Character.h"
 #include <algorithm> // Нужен для функций std::max и std::min (ограничители движения)
 #include <random>
@@ -7,9 +8,13 @@
 
 // 1. КОНСТРУКТОР: вызывается в момент создания игры в памяти
 GameEngine::GameEngine(QObject *parent) : QObject(parent) {
+    m_map = new GameMap(this);
+
     m_player = new Character(365, 667, this);
     m_player->setIsInCar(true);
     // m_assistant = new Character(7_grid, 14_grid, this);
+
+    m_playerStep = m_map->gridSize();
 
     // 1. Инициализируем генератор случайных чисел
     std::random_device rd;  // Получаем аппаратное случайное число для затравки
@@ -36,14 +41,18 @@ GameEngine::GameEngine(QObject *parent) : QObject(parent) {
     connect(m_moveCooldownTimer, &QTimer::timeout, this, &GameEngine::onMoveFinished);
 
     QTimer::singleShot(100, this, [this]() {
-        m_carX = mapSize() / 2 - gridSize();
+        m_carX = mapSize() / 2 - m_map->gridSize();
         emit carXChanged(); // Кидаем сигнал: координата carX изменилась
     });
 }
 
 GameEngine::~GameEngine() {}
 
-// 2. СЕКУНДНЫЙ ТИК ТАЙМЕРА (асинхронно уменьшает время)
+int GameEngine::mapSize() const {
+    return m_map->mapSize();
+}
+
+// СЕКУНДНЫЙ ТИК ТАЙМЕРА (асинхронно уменьшает время)
 void GameEngine::onTimerTick() {
     if (m_isGameOver) return; // Если игра окончена, ничего не делаем
 
@@ -103,26 +112,19 @@ void GameEngine::handleKeyPress(const QString &key) {
     }
 
     // Проверяем столкновение со СТЕНОЙ
-    bool hitAnyWall = false;
-    // Циклом проверяем столкновение с каждой из 4 стен комнаты
-    for (size_t i = 0; i < m_wallsLayout.size(); ++i) {
-        if (checkCollision(nextX, nextY, m_wallsLayout[i].x, m_wallsLayout[i].y, m_wallsLayout[i].w, m_wallsLayout[i].h)) {
-            hitAnyWall = true;
-            break;
-        }
+    if (m_map->isWallAt(nextX, nextY, m_playerSize)) {
+        return;
     }
 
     // Если впереди чисто — двигаемся
-    if (!hitAnyWall) {
-        int clampedX = std::max(0, std::min(nextX, m_mapSize - m_playerSize));
-        int clampedY = std::max(0, std::min(nextY, m_mapSize - m_playerSize));
+    int clampedX = std::max(0, std::min(nextX, mapSize() - m_playerSize));
+    int clampedY = std::max(0, std::min(nextY, mapSize() - m_playerSize));
 
-        m_player->setX(clampedX);
-        m_player->setY(clampedY);
+    m_player->setX(clampedX);
+    m_player->setY(clampedY);
 
-        m_isMoving = true;             // Закрываем замок для кнопок
-        m_moveCooldownTimer->start(); // Запускаем отсчет n миллисекунд
-    }
+    m_isMoving = true;             // Закрываем замок для кнопок
+    m_moveCooldownTimer->start(); // Запускаем отсчет n миллисекунд
 
     bool isInCar = checkCollision(m_player->x(), m_player->y(), m_safeZoneGeometry[0], m_safeZoneGeometry[1], m_safeZoneGeometry[2], m_safeZoneGeometry[3]);
     m_player->setIsInCar(isInCar);
@@ -134,7 +136,7 @@ void GameEngine::handleKeyPress(const QString &key) {
     }
 }
 
-// 4. МАТЕМАТИКА КОЛЛИЗИЙ (AABB столкновение прямоугольников)
+// МАТЕМАТИКА КОЛЛИЗИЙ (AABB столкновение прямоугольников)
 bool GameEngine::checkCollision(int nx, int ny, int ox, int oy, int ow, int oh) {
     // Чистая геометрия
     return (nx < ox + ow &&
@@ -146,20 +148,6 @@ bool GameEngine::checkCollision(int nx, int ny, int ox, int oy, int ow, int oh) 
 void GameEngine::onMoveFinished() {
     m_isMoving = false; // Время анимации вышло, открываем замок для следующего шага!
 }
-
-QVariantList GameEngine::walls() const {
-    QVariantList list;
-    for (size_t i = 0; i < m_wallsLayout.size(); ++i) {
-        QVariantMap map;
-        map["x"] = m_wallsLayout[i].x;
-        map["y"] = m_wallsLayout[i].y;
-        map["w"] = m_wallsLayout[i].w;
-        map["h"] = m_wallsLayout[i].h;
-        list.append(map);
-    }
-    return list;
-}
-
 
 void GameEngine::onCarArrived() {
     qDebug() << "C++: 2 секунды истекли! Переключаем carState в 1!";

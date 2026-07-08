@@ -1,4 +1,5 @@
 import QtQuick
+import "../components"
 
 Window {
     id: root
@@ -49,7 +50,7 @@ Window {
 
         // СТЕНЫ
         Repeater {
-            model: gameEngine.walls
+            model: gameEngine.map.walls
             Wall {
                 x: modelData.x
                 y: modelData.y
