@@ -30,10 +30,10 @@ Window {
 
         Player {
             id: player
-            x: gameEngine.playerX
-            y: gameEngine.playerY
+            x: gameEngine.player.x
+            y: gameEngine.player.y
 
-            opacity: gameEngine.isPlayerInTheCar ? 0 : 1
+            opacity: gameEngine.player.isInCar ? 0 : 1
 
             Behavior on opacity { NumberAnimation { duration: 100 } }
         }

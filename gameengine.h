@@ -17,6 +17,7 @@ struct WallData {
     int h;
 };
 
+class Character;
 
 class GameEngine : public QObject {
     Q_OBJECT // Обязательный макрос Qt для работы реактивности
@@ -28,11 +29,10 @@ class GameEngine : public QObject {
     Q_PROPERTY(QString gameStatus READ gameStatus NOTIFY gameStatusChanged)
     Q_PROPERTY(int moveDuration READ moveDuration CONSTANT)
     Q_PROPERTY(int gridSize READ gridSize CONSTANT)
-    Q_PROPERTY(bool isPlayerInTheCar READ isPlayerInTheCar NOTIFY isPlayerInTheCarChanged)
 
-    // Координаты игрока теперь хранятся в C++
-    Q_PROPERTY(int playerX READ playerX NOTIFY playerPositionChanged)
-    Q_PROPERTY(int playerY READ playerY NOTIFY playerPositionChanged)
+    // Координаты игрока
+    Q_PROPERTY(Character* player READ player CONSTANT)
+    // Q_PROPERTY(Character* assistant READ assistant CONSTANT)
 
     // Мосты для Стен
     Q_PROPERTY(QVariantList walls READ walls CONSTANT)
@@ -62,17 +62,19 @@ class GameEngine : public QObject {
 public:
     explicit GameEngine(QObject *parent = nullptr);
 
+    ~GameEngine() override;
+
+    Character* player() const { return m_player; }
+    // Character* assistant() const { return m_assistant; }
+
     // Геттеры для чтения данных из QML
     int timeLeft() const { return m_timeLeft; }
     bool isGameOver() const { return m_isGameOver; }
     bool doorLocked() const { return m_doorLocked; }
     QString gameStatus() const { return m_gameStatus; }
-    int playerX() const { return m_playerX; }
-    int playerY() const { return m_playerY; }
     int moveDuration() const { return m_moveDuration; }
     int gridSize() const { return m_gridSize; }
     int mapSize() const { return m_mapSize; }
-    bool isPlayerInTheCar() const { return m_isPlayerInTheCar; }
 
     // Геттеры для Стены
     QVariantList walls() const;
@@ -109,11 +111,9 @@ signals:
     void isGameOverChanged();
     void doorLockedChanged();
     void gameStatusChanged();
-    void playerPositionChanged();
     void safeLootedChanged();
     void carStateChanged();
     void carXChanged();
-    void isPlayerInTheCarChanged();
 
 public slots:
     void onCarArrived();
@@ -129,10 +129,6 @@ private:
     bool m_doorLocked = true;
     QString m_gameStatus = "Доберись до СЕЙФА и вернись к МАШИНЕ!";
     const int m_gridSize = 50;
-
-    // Player
-    int m_playerX = 365;
-    int m_playerY = 667;
 
     // Car
     int m_safeZoneGeometry[4] = {7_grid, 14_grid, 2_grid, 1_grid};
@@ -161,6 +157,8 @@ private:
 
     // Константы размеров
     // Player
+    Character* m_player = nullptr;
+    // Character* m_assistant = nullptr;
     int m_playerStep = 1_grid;
     const int m_moveDuration = 300; // Скорость шага в миллисекундах
 
@@ -168,7 +166,6 @@ private:
     const int m_playerSize = 16; // Размер кубика вора (ширина и высота)
 
     bool m_isMoving = true;
-    bool m_isPlayerInTheCar = true;
 
     // timers
     QTimer *m_moveCooldownTimer; // Таймер блокировки кнопок на время анимации

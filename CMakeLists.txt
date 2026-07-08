@@ -12,6 +12,8 @@ qt_add_executable(appThief60Seconds
     main.cpp
     gameengine.h
     gameengine.cpp
+    Character.h
+    Character.cpp
 )
 
 qt_add_qml_module(appThief60Seconds

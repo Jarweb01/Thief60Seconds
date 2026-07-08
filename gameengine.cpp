@@ -1,4 +1,5 @@
 #include "gameengine.h"
+#include "Character.h"
 #include <algorithm> // Нужен для функций std::max и std::min (ограничители движения)
 #include <random>
 #include <QVariantMap>
@@ -6,6 +7,10 @@
 
 // 1. КОНСТРУКТОР: вызывается в момент создания игры в памяти
 GameEngine::GameEngine(QObject *parent) : QObject(parent) {
+    m_player = new Character(365, 667, this);
+    m_player->setIsInCar(true);
+    // m_assistant = new Character(7_grid, 14_grid, this);
+
     // 1. Инициализируем генератор случайных чисел
     std::random_device rd;  // Получаем аппаратное случайное число для затравки
     std::mt19937 gen(rd()); // Инициализируем стандартный генератор Вихрь Мерсенна
@@ -36,6 +41,8 @@ GameEngine::GameEngine(QObject *parent) : QObject(parent) {
     });
 }
 
+GameEngine::~GameEngine() {}
+
 // 2. СЕКУНДНЫЙ ТИК ТАЙМЕРА (асинхронно уменьшает время)
 void GameEngine::onTimerTick() {
     if (m_isGameOver) return; // Если игра окончена, ничего не делаем
@@ -54,17 +61,17 @@ void GameEngine::onTimerTick() {
         emit carStateChanged();
         emit carXChanged();
 
-        m_isPlayerInTheCar = checkCollision(m_playerX, m_playerY, m_safeZoneGeometry[0], m_safeZoneGeometry[1], m_safeZoneGeometry[2], m_safeZoneGeometry[3]);
+        bool inCar = checkCollision(m_player->x(), m_player->y(), m_safeZoneGeometry[0], m_safeZoneGeometry[1], m_safeZoneGeometry[2], m_safeZoneGeometry[3]);
+        m_player->setIsInCar(inCar);
 
         // Проверяем, вернулся ли игрок к Машине
-        if (m_isPlayerInTheCar) {
+        if (m_player->isInCar()) {
             m_gameStatus = "ВЫ ВЫИГРАЛИ!";
         } else {
             m_gameStatus = "ИГРА ОКОНЧЕНА! Машина уехала, вы остались!";
         }
 
         emit gameStatusChanged(); // Обновляем текст статуса в UI
-        emit playerPositionChanged();
     }
 }
 
@@ -72,8 +79,8 @@ void GameEngine::onTimerTick() {
 void GameEngine::handleKeyPress(const QString &key) {
     if (m_isGameOver || m_isMoving) return;
 
-    int nextX = m_playerX;
-    int nextY = m_playerY;
+    int nextX = m_player->x();
+    int nextY = m_player->y();
 
     // Сравниваем строки на чистом C++
     if (key == "Left")  { nextX -= m_playerStep; }
@@ -81,7 +88,7 @@ void GameEngine::handleKeyPress(const QString &key) {
     if (key == "Up")    { nextY -= m_playerStep; }
     if (key == "Down")  { nextY += m_playerStep; }
 
-    // 1. ПРОВЕРКА СЕЙФА (Действует как стена + триггер взлома)
+    // ПРОВЕРКА СЕЙФА (Действует как стена + триггер взлома)
     // Проверяем, натыкается ли СЛЕДУЮЩИЙ шаг вора на координаты сейфа
     if(checkCollision(nextX, nextY, m_safeGeometry[0], m_safeGeometry[1], m_safeGeometry[2], m_safeGeometry[3])) {
 
@@ -107,22 +114,22 @@ void GameEngine::handleKeyPress(const QString &key) {
 
     // Если впереди чисто — двигаемся
     if (!hitAnyWall) {
-        m_playerX = std::max(0, std::min(nextX, m_mapSize - m_playerSize));
-        m_playerY = std::max(0, std::min(nextY, m_mapSize - m_playerSize));
+        int clampedX = std::max(0, std::min(nextX, m_mapSize - m_playerSize));
+        int clampedY = std::max(0, std::min(nextY, m_mapSize - m_playerSize));
 
-        // Если координаты реально изменились, включаем блокировку
+        m_player->setX(clampedX);
+        m_player->setY(clampedY);
+
         m_isMoving = true;             // Закрываем замок для кнопок
         m_moveCooldownTimer->start(); // Запускаем отсчет n миллисекунд
-
-        emit playerPositionChanged();
     }
 
-    m_isPlayerInTheCar = checkCollision(m_playerX, m_playerY, m_safeZoneGeometry[0], m_safeZoneGeometry[1], m_safeZoneGeometry[2], m_safeZoneGeometry[3]);
+    bool isInCar = checkCollision(m_player->x(), m_player->y(), m_safeZoneGeometry[0], m_safeZoneGeometry[1], m_safeZoneGeometry[2], m_safeZoneGeometry[3]);
+    m_player->setIsInCar(isInCar);
 
     // Проверяем касание ДВЕРИ
-    if (checkCollision(m_playerX, m_playerY, m_doorGeometry[0], m_doorGeometry[1], m_doorGeometry[2], m_doorGeometry[3])) {
+    if (checkCollision(m_player->x(), m_player->y(), m_doorGeometry[0], m_doorGeometry[1], m_doorGeometry[2], m_doorGeometry[3])) {
         m_doorLocked = false;
-
         emit doorLockedChanged(); // Дверь в QML мгновенно зеленеет
     }
 }
@@ -158,8 +165,7 @@ void GameEngine::onCarArrived() {
     qDebug() << "C++: 2 секунды истекли! Переключаем carState в 1!";
     m_carState = 1; // Переводим машину в режим ожидания (стоим)
     m_isMoving = false; // Разрешаем игроку ходить
-    m_isPlayerInTheCar = false;
+
+    m_player->setIsInCar(false);
     emit carStateChanged();
-    emit playerPositionChanged();
-    emit isPlayerInTheCarChanged();
 }
