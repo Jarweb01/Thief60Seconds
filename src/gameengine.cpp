@@ -2,10 +2,15 @@
 #include "GameMap.h"
 #include "Character.h"
 #include "InteractableObject.h"
+#include "TimeManager.h"
 #include <algorithm> // Нужен для функций std::max и std::min (ограничители движения)
-#include <random>
 #include <QVariantMap>
 #include <QDebug>
+
+// Оператор кастомного литерала. Теперь суффикс _grid будет автоматически умножать число на 50
+constexpr int operator"" _gridSize(unsigned long long int cells) {
+    return cells * 50;
+}
 
 // 1. КОНСТРУКТОР: вызывается в момент создания игры в памяти
 GameEngine::GameEngine(QObject *parent) : QObject(parent) {
@@ -22,23 +27,10 @@ GameEngine::GameEngine(QObject *parent) : QObject(parent) {
     m_safe = new InteractableObject(5_gridSize, 6_gridSize,  1_gridSize, 1_gridSize, "safe", false, this);
 
     // TIMER START
-    // 1. Инициализируем генератор случайных чисел
-    std::random_device rd;  // Получаем аппаратное случайное число для затравки
-    std::mt19937 gen(rd()); // Инициализируем стандартный генератор Вихрь Мерсенна
+    m_timeManager = new TimeManager(this);
 
-    // 2. Задаем диапазон распределения
-    std::uniform_int_distribution<> distr(250, 260);
-
-    // 3. Присваиваем случайное число нашей переменной времени
-    m_timeLeft = distr(gen);
-
-    m_timer = new QTimer(this); // Выделяем память под плюсовый таймер
-    m_timer->setInterval(1000); // Задаем интервал тика в 1000 миллисекунд (1 секунда)
-
-    // Связываем сигнал таймера (timeout) со слотом (нашей функцией onTimerTick)
-    connect(m_timer, &QTimer::timeout, this, &GameEngine::onTimerTick);
-
-    m_timer->start(); // Запускаем обратный отсчет таймера
+    // Связываем сигнал окончания времени из TimeManager со слотом конца игры в движке
+    connect(m_timeManager, &TimeManager::timeUp, this, &GameEngine::handleTimeUp);
 
     // Настраиваем таймер кулдауна движения
     m_moveCooldownTimer = new QTimer(this);
@@ -60,37 +52,29 @@ int GameEngine::mapSize() const {
 }
 
 // СЕКУНДНЫЙ ТИК ТАЙМЕРА (асинхронно уменьшает время)
-void GameEngine::onTimerTick() {
+void GameEngine::handleTimeUp() {
     if (m_isGameOver) return; // Если игра окончена, ничего не делаем
 
-    m_timeLeft--;
-    emit timeLeftChanged(); // Стреляем сигналом: QML тут же обновит цифру на экране
+    m_isGameOver = true;
+    emit isGameOverChanged(); // Сигнализируем QML, что управление пора заблочить
 
-    if (m_timeLeft == 0) {
-        m_isGameOver = true;
-        emit isGameOverChanged(); // Сигнализируем QML, что управление пора заблочить
-        m_timer->stop();
+    m_carState = 2;
+    m_carX = mapSize();
+    emit carStateChanged();
+    emit carXChanged();
 
-        m_carState = 2;
-        m_carX = mapSize();
+    QRect playerRect(m_player->x(), m_player->y(), m_playerSize, m_playerSize);
+    bool inCar = playerRect.intersects(m_car->rect());
+    m_player->setIsInCar(inCar);
 
-        emit carStateChanged();
-        emit carXChanged();
-
-        QRect playerRect(m_player->x(), m_player->y(), m_playerSize, m_playerSize);
-
-        bool inCar = playerRect.intersects(m_car->rect());
-        m_player->setIsInCar(inCar);
-
-        // Проверяем, вернулся ли игрок к Машине
-        if (m_player->isInCar()) {
-            m_gameStatus = "ВЫ ВЫИГРАЛИ!";
-        } else {
-            m_gameStatus = "ИГРА ОКОНЧЕНА! Машина уехала, вы остались!";
-        }
-
-        emit gameStatusChanged(); // Обновляем текст статуса в UI
+    // Проверяем, вернулся ли игрок к Машине
+    if (m_player->isInCar()) {
+        m_gameStatus = "ВЫ ВЫИГРАЛИ!";
+    } else {
+        m_gameStatus = "ИГРА ОКОНЧЕНА! Машина уехала, вы остались!";
     }
+
+    emit gameStatusChanged(); // Обновляем текст статуса в UI
 }
 
 // 3. ОБРАБОТКА НАЖАТИЯ КНОПОК (Вызывается из JS-кода в QML)

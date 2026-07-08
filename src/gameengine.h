@@ -4,20 +4,16 @@
 #include <QString>
 #include <QVariant>
 
-// Оператор кастомного литерала. Теперь суффикс _grid будет автоматически умножать число на 50
-constexpr int operator"" _gridSize(unsigned long long int cells) {
-    return cells * 50;
-}
-
 class Character;
 class GameMap;
 class InteractableObject;
+class TimeManager;
 
 class GameEngine : public QObject {
     Q_OBJECT // Обязательный макрос Qt для работы реактивности
 
     // Регистрируем свойства для QML
-    Q_PROPERTY(int timeLeft READ timeLeft NOTIFY timeLeftChanged)
+    Q_PROPERTY(TimeManager* timeManager READ timeManager CONSTANT)
     Q_PROPERTY(bool isGameOver READ isGameOver NOTIFY isGameOverChanged)
     Q_PROPERTY(bool doorLocked READ doorLocked NOTIFY doorLockedChanged)
     Q_PROPERTY(QString gameStatus READ gameStatus NOTIFY gameStatusChanged)
@@ -52,7 +48,7 @@ public:
     GameMap* map() const { return m_map; }
 
     // Геттеры для чтения данных из QML
-    int timeLeft() const { return m_timeLeft; }
+    TimeManager* timeManager() const { return m_timeManager; }
     bool isGameOver() const { return m_isGameOver; }
     bool doorLocked() const { return m_doorLocked; }
     QString gameStatus() const { return m_gameStatus; }
@@ -75,7 +71,6 @@ public:
 
 signals:
     // Сигналы-уведомления для авто-перерисовки UI
-    void timeLeftChanged();
     void isGameOverChanged();
     void doorLockedChanged();
     void gameStatusChanged();
@@ -85,21 +80,19 @@ signals:
 
 public slots:
     void onCarArrived();
+    void handleTimeUp();
 
 private slots:
-    void onTimerTick(); // Метод для обработки тика секундного таймера
     void onMoveFinished();
 
 private:
     // Внутреннее состояние игры (State)
-    int m_timeLeft; // Инициализируется рандомом в .cpp
     bool m_isGameOver = false;
     bool m_doorLocked = true;
     QString m_gameStatus = "Доберись до СЕЙФА и вернись к МАШИНЕ!";
 
     // Car
     InteractableObject* m_car = nullptr;
-    // int m_safeZoneGeometry[4] = {7_gridSize, 14_gridSize, 2_gridSize, 1_gridSize};
     int m_carState = 0; // 0 - приезд, 1 - игра, 2 - побег
     int m_carX = -20;
 
@@ -122,7 +115,7 @@ private:
 
     bool m_isMoving = true;
 
-    // timers
+    // timer
     QTimer *m_moveCooldownTimer; // Таймер блокировки кнопок на время анимации
-    QTimer *m_timer; // Плюсовый таймер
+    TimeManager* m_timeManager = nullptr;
 };

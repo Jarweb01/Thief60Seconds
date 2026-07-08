@@ -7,14 +7,24 @@ Window {
     height: 800
     visible: true
     title: "2D Прототип за 60 секунд"
-    color: "#1a252f"
+    color: gameEngine.timeManager.isTimeRunningOut ? "#e74c3c" : "#000"
+
+    Behavior on color {
+        // Анимация сработает только тогда, когда isTimeRunningOut переключится в true
+        SequentialAnimation {
+            loops: Animation.Infinite // Мигаем бесконечно, пока не наступит GameOver
+
+            ColorAnimation { duration: 400; easing.type: Easing.InOutQuad }
+            ColorAnimation { to: "#1a252f"; duration: 400; easing.type: Easing.InOutQuad }
+        }
+    }
 
     // ВЕРХНЯЯ ПАНЕЛЬ СЧЕТЧИКА
     GameHeader {
         id: header
         anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter
-        time: gameEngine.timeLeft       // Передаем стейт времени
+        time: gameEngine.timeManager.timeLeft       // Передаем стейт времени
         status: gameEngine.gameStatus   // Передаем стейт статуса
     }
 
