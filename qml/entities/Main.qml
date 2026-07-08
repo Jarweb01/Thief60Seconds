@@ -7,15 +7,15 @@ Window {
     height: 800
     visible: true
     title: "2D Прототип за 60 секунд"
-    color: gameEngine.timeManager.isTimeRunningOut ? "#e74c3c" : "#000"
+    color: gameEngine.timeManager.isTimeRunningOut ? "#59212D" : "#1a252f"
 
     Behavior on color {
         // Анимация сработает только тогда, когда isTimeRunningOut переключится в true
         SequentialAnimation {
             loops: Animation.Infinite // Мигаем бесконечно, пока не наступит GameOver
 
-            ColorAnimation { duration: 400; easing.type: Easing.InOutQuad }
-            ColorAnimation { to: "#1a252f"; duration: 400; easing.type: Easing.InOutQuad }
+            ColorAnimation { duration: 600; easing.type: Easing.InOutQuad }
+            ColorAnimation { to: "#1a252f"; duration: 600; easing.type: Easing.InOutQuad }
         }
     }
 

@@ -26,6 +26,6 @@ private slots:
 private:
     int m_timeLeft;
     QTimer * m_timer = nullptr;
-    const int m_panicThreshold = 20;
+    const int m_panicThreshold = 28;
 };
 
