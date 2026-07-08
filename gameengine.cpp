@@ -11,7 +11,7 @@ GameEngine::GameEngine(QObject *parent) : QObject(parent) {
     std::mt19937 gen(rd()); // Инициализируем стандартный генератор Вихрь Мерсенна
 
     // 2. Задаем диапазон распределения
-    std::uniform_int_distribution<> distr(50, 60);
+    std::uniform_int_distribution<> distr(250, 260);
 
     // 3. Присваиваем случайное число нашей переменной времени
     m_timeLeft = distr(gen);
