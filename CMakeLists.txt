@@ -16,6 +16,8 @@ qt_add_executable(appThief60Seconds
     src/Character.cpp
     src/GameMap.h
     src/GameMap.cpp
+    src/InteractableObject.h
+    src/InteractableObject.cpp
 )
 
 qt_add_qml_module(appThief60Seconds

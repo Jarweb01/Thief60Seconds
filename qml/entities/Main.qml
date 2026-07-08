@@ -42,9 +42,6 @@ Window {
         // Машина
         Car {
             id: car
-            y: gameEngine.safeZoneY
-            width: gameEngine.safeZoneWidth
-            height: gameEngine.safeZoneHeight
             stateIndex: gameEngine.carState
         }
 
@@ -62,21 +59,11 @@ Window {
         // ДВЕРЬ
         Door {
             id: door
-            x: gameEngine.doorX
-            y: gameEngine.doorY
-            width: gameEngine.doorWidth
-            height: gameEngine.doorHeight
-            isLocked: gameEngine.doorLocked
         }
 
         // СЕЙФ С ДОБЫЧЕЙ
         Safe {
             id: safe
-            x: gameEngine.safeX
-            y: gameEngine.safeY
-            width: gameEngine.safeWidth
-            height: gameEngine.safeHeight
-            isLooted: gameEngine.safeLooted
         }
 
         // Логика управления (чистый JS)

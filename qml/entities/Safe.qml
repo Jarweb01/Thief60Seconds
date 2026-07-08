@@ -3,7 +3,12 @@ import QtQuick
 Rectangle {
     id: safe
 
-    property bool isLooted: false
+    x: gameEngine.safe.rect.x
+    y: gameEngine.safe.rect.y
+    width: gameEngine.safe.rect.width
+    height: gameEngine.safe.rect.height
+
+    property bool isLooted: gameEngine.safe.isStateActive
 
     color:  isLooted ? "#f1c40f" : "#7f8c8d"
 

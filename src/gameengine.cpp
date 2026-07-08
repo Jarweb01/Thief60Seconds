@@ -1,6 +1,7 @@
 #include "gameengine.h"
 #include "GameMap.h"
 #include "Character.h"
+#include "InteractableObject.h"
 #include <algorithm> // Нужен для функций std::max и std::min (ограничители движения)
 #include <random>
 #include <QVariantMap>
@@ -16,6 +17,11 @@ GameEngine::GameEngine(QObject *parent) : QObject(parent) {
 
     m_playerStep = m_map->gridSize();
 
+    m_car = new InteractableObject(7_gridSize, 14_gridSize, 2_gridSize, 1_gridSize, "car",  false, this);
+    m_door = new InteractableObject(7_gridSize, 4_gridSize,  1_gridSize, static_cast<int>(1_gridSize * 0.4), "door", true, this);
+    m_safe = new InteractableObject(5_gridSize, 6_gridSize,  1_gridSize, 1_gridSize, "safe", false, this);
+
+    // TIMER START
     // 1. Инициализируем генератор случайных чисел
     std::random_device rd;  // Получаем аппаратное случайное число для затравки
     std::mt19937 gen(rd()); // Инициализируем стандартный генератор Вихрь Мерсенна
@@ -44,6 +50,7 @@ GameEngine::GameEngine(QObject *parent) : QObject(parent) {
         m_carX = mapSize() / 2 - m_map->gridSize();
         emit carXChanged(); // Кидаем сигнал: координата carX изменилась
     });
+    // TIMER END
 }
 
 GameEngine::~GameEngine() {}
@@ -70,7 +77,9 @@ void GameEngine::onTimerTick() {
         emit carStateChanged();
         emit carXChanged();
 
-        bool inCar = checkCollision(m_player->x(), m_player->y(), m_safeZoneGeometry[0], m_safeZoneGeometry[1], m_safeZoneGeometry[2], m_safeZoneGeometry[3]);
+        QRect playerRect(m_player->x(), m_player->y(), m_playerSize, m_playerSize);
+
+        bool inCar = playerRect.intersects(m_car->rect());
         m_player->setIsInCar(inCar);
 
         // Проверяем, вернулся ли игрок к Машине
@@ -97,13 +106,15 @@ void GameEngine::handleKeyPress(const QString &key) {
     if (key == "Up")    { nextY -= m_playerStep; }
     if (key == "Down")  { nextY += m_playerStep; }
 
+    QRect nextPlayerRect(nextX, nextY, m_playerSize, m_playerSize);
+
     // ПРОВЕРКА СЕЙФА (Действует как стена + триггер взлома)
     // Проверяем, натыкается ли СЛЕДУЮЩИЙ шаг вора на координаты сейфа
-    if(checkCollision(nextX, nextY, m_safeGeometry[0], m_safeGeometry[1], m_safeGeometry[2], m_safeGeometry[3])) {
+    if(nextPlayerRect.intersects(m_safe->rect())) {
 
         // Если сейф ещё не был взломан — взламываем!
-        if(!m_safeLooted){
-            m_safeLooted = true;
+        if(!m_safe->isStateActive()){
+            m_safe->setIsStateActive(true);
 
             emit safeLootedChanged();
         }
@@ -126,23 +137,19 @@ void GameEngine::handleKeyPress(const QString &key) {
     m_isMoving = true;             // Закрываем замок для кнопок
     m_moveCooldownTimer->start(); // Запускаем отсчет n миллисекунд
 
-    bool isInCar = checkCollision(m_player->x(), m_player->y(), m_safeZoneGeometry[0], m_safeZoneGeometry[1], m_safeZoneGeometry[2], m_safeZoneGeometry[3]);
+    QRect currentPlayerRect(m_player->x(), m_player->y(), m_playerSize, m_playerSize);
+
+    bool isInCar = currentPlayerRect.intersects(m_car->rect());
     m_player->setIsInCar(isInCar);
 
     // Проверяем касание ДВЕРИ
-    if (checkCollision(m_player->x(), m_player->y(), m_doorGeometry[0], m_doorGeometry[1], m_doorGeometry[2], m_doorGeometry[3])) {
-        m_doorLocked = false;
-        emit doorLockedChanged(); // Дверь в QML мгновенно зеленеет
+    if (currentPlayerRect.intersects(m_door->rect())) {
+        if (m_door->isStateActive()) {
+            m_door->setIsStateActive(false);
+            m_doorLocked = false;
+            emit doorLockedChanged(); // Дверь в QML мгновенно зеленеет
+        }
     }
-}
-
-// МАТЕМАТИКА КОЛЛИЗИЙ (AABB столкновение прямоугольников)
-bool GameEngine::checkCollision(int nx, int ny, int ox, int oy, int ow, int oh) {
-    // Чистая геометрия
-    return (nx < ox + ow &&
-            nx + m_playerSize > ox &&
-            ny < oy + oh &&
-            ny + m_playerSize > oy);
 }
 
 void GameEngine::onMoveFinished() {

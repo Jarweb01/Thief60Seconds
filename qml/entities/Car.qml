@@ -6,6 +6,10 @@ Rectangle {
     border.color: "#00d2d3"
     border.width: 2
 
+    y: gameEngine.car.rect.y
+    width: gameEngine.car.rect.width
+    height: gameEngine.car.rect.height
+
     property int stateIndex: 0
 
     x: gameEngine.carX

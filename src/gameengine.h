@@ -3,7 +3,6 @@
 #include <QTimer>
 #include <QString>
 #include <QVariant>
-// #include <vector>
 
 // Оператор кастомного литерала. Теперь суффикс _grid будет автоматически умножать число на 50
 constexpr int operator"" _gridSize(unsigned long long int cells) {
@@ -12,11 +11,12 @@ constexpr int operator"" _gridSize(unsigned long long int cells) {
 
 class Character;
 class GameMap;
+class InteractableObject;
 
 class GameEngine : public QObject {
     Q_OBJECT // Обязательный макрос Qt для работы реактивности
 
-    // Регистрируем свойства для QML (как стейт в React)
+    // Регистрируем свойства для QML
     Q_PROPERTY(int timeLeft READ timeLeft NOTIFY timeLeftChanged)
     Q_PROPERTY(bool isGameOver READ isGameOver NOTIFY isGameOverChanged)
     Q_PROPERTY(bool doorLocked READ doorLocked NOTIFY doorLockedChanged)
@@ -31,26 +31,16 @@ class GameEngine : public QObject {
     Q_PROPERTY(GameMap* map READ map CONSTANT)
 
     // Мосты для Двери
-    Q_PROPERTY(int doorX READ doorX CONSTANT)
-    Q_PROPERTY(int doorY READ doorY CONSTANT)
-    Q_PROPERTY(int doorWidth READ doorWidth CONSTANT)
-    Q_PROPERTY(int doorHeight READ doorHeight CONSTANT)
+    Q_PROPERTY(InteractableObject* door READ door CONSTANT)
 
     // Мосты для Машины
-    Q_PROPERTY(int safeZoneX READ safeZoneX CONSTANT)
-    Q_PROPERTY(int safeZoneY READ safeZoneY CONSTANT)
-    Q_PROPERTY(int safeZoneWidth READ safeZoneWidth CONSTANT)
-    Q_PROPERTY(int safeZoneHeight READ safeZoneHeight CONSTANT)
+    Q_PROPERTY(InteractableObject* car READ car CONSTANT)
+
     Q_PROPERTY(int carState READ carState NOTIFY carStateChanged)
     Q_PROPERTY(int carX READ carX NOTIFY carXChanged)
 
     // Мосты для Сейфа
-    Q_PROPERTY(int safeX READ safeX CONSTANT)
-    Q_PROPERTY(int safeY READ safeY CONSTANT)
-    Q_PROPERTY(int safeWidth READ safeWidth CONSTANT)
-    Q_PROPERTY(int safeHeight READ safeHeight CONSTANT)
-    Q_PROPERTY(bool safeLooted READ safeLooted NOTIFY safeLootedChanged)
-
+    Q_PROPERTY(InteractableObject* safe READ safe CONSTANT)
 
 public:
     explicit GameEngine(QObject *parent = nullptr);
@@ -70,27 +60,15 @@ public:
     int mapSize() const;
 
     // Геттеры для Двери
-    int doorX() const { return m_doorGeometry[0]; }
-    int doorY() const { return m_doorGeometry[1]; }
-    int doorWidth() const { return m_doorGeometry[2]; }
-    int doorHeight() const { return m_doorGeometry[3]; }
+    InteractableObject* door() const { return m_door; }
 
     // Геттеры для Машины
-    int safeZoneX() const { return m_safeZoneGeometry[0]; }
-    int safeZoneY() const { return m_safeZoneGeometry[1]; }
-    int safeZoneWidth() const { return m_safeZoneGeometry[2]; }
-    int safeZoneHeight() const { return m_safeZoneGeometry[3]; }
+    InteractableObject* car() const { return m_car; }
     int carState() const { return m_carState; }
     int carX() const { return m_carX; }
 
-
     // Геттеры для Сейфа
-    int safeX() const      { return m_safeGeometry[0]; }
-    int safeY() const      { return m_safeGeometry[1]; }
-    int safeWidth() const  { return m_safeGeometry[2]; }
-    int safeHeight() const { return m_safeGeometry[3]; }
-    bool safeLooted() const { return m_safeLooted; }
-
+    InteractableObject* safe() const { return m_safe; }
 
     // Этот макрос разрешает вызывать метод C++ прямо из QML-кода кнопок
     Q_INVOKABLE void handleKeyPress(const QString &key);
@@ -120,15 +98,16 @@ private:
     QString m_gameStatus = "Доберись до СЕЙФА и вернись к МАШИНЕ!";
 
     // Car
-    int m_safeZoneGeometry[4] = {7_gridSize, 14_gridSize, 2_gridSize, 1_gridSize};
+    InteractableObject* m_car = nullptr;
+    // int m_safeZoneGeometry[4] = {7_gridSize, 14_gridSize, 2_gridSize, 1_gridSize};
     int m_carState = 0; // 0 - приезд, 1 - игра, 2 - побег
     int m_carX = -20;
 
-    int m_doorGeometry[4] = {7_gridSize, 4_gridSize, 1_gridSize, static_cast<int>(1_gridSize * 0.4)};
+    // Door
+    InteractableObject* m_door = nullptr;
 
     // Safe
-    bool m_safeLooted = false;
-    int m_safeGeometry[4] = {5_gridSize, 6_gridSize,  1_gridSize, 1_gridSize};
+    InteractableObject* m_safe = nullptr;
 
 
     // Константы размеров
@@ -139,7 +118,6 @@ private:
 
     int m_playerStep;
     const int m_moveDuration = 400; // Скорость шага в миллисекундах
-
     const int m_playerSize = 16; // Размер кубика вора (ширина и высота)
 
     bool m_isMoving = true;
@@ -147,7 +125,4 @@ private:
     // timers
     QTimer *m_moveCooldownTimer; // Таймер блокировки кнопок на время анимации
     QTimer *m_timer; // Плюсовый таймер
-
-    // Чистая C++ математика коллизий (AABB)
-    bool checkCollision(int nx, int ny, int ox, int oy, int ow, int oh);
 };
