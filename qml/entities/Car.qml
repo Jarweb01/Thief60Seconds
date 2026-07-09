@@ -12,11 +12,13 @@ Rectangle {
     width: cppObject ? cppObject.rect.width : 0
     height: cppObject ? cppObject.rect.height : 0
 
-    property int stateIndex: 0
-    x: gameEngine.carX
+    property int stateIndex: cppObject ? cppObject.state : 0
+    x: cppObject ? cppObject.x : -50
 
     // Плавная анимация изменения координаты X ровно на 2 секунды (2000 мс)
     Behavior on x {
+        enabled: car.cppObject !== null
+
         NumberAnimation {
             id: carAnimation
             duration: 2000
@@ -24,11 +26,11 @@ Rectangle {
 
             onRunningChanged: {
                 if (!running) { // !running означает, что полет окончен!
-                    console.log("QML: Машина ОСТАНОВИЛАСЬ в точке 400! Текущий stateIndex =", car.stateIndex);
+                    console.log("QML: Машина ОСТАНОВИЛАСЬ в точке " + car.x + "! Текущий stateIndex =", car.stateIndex);
 
-                    if (car.stateIndex === 0) {
-                        console.log("QML: Дергаем C++ метод GameEngine::onCarArrived()...");
-                        gameEngine.onCarArrived();
+                    if (car.stateIndex === 0 && car.x > 0 && car.cppObject) {
+                        console.log("QML: Дергаем C++ метод car.cppObject.finishArrival()...");
+                        car.cppObject.finishArrival();
                     }
                 }
             }

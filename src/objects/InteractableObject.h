@@ -29,8 +29,10 @@ public:
 signals:
     void stateActiveChanged();
 
-private:
+protected:
     QRect m_rect;
+
+private:
     QString m_type;
     bool m_isStateActive;
 };

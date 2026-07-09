@@ -23,11 +23,11 @@ GameEngine::GameEngine(QObject *parent) : QObject(parent) {
     // m_assistant = new Character(7_grid, 14_grid, this);
     m_playerStep = m_map->gridSize();
 
-    auto* car = new CarObject(7_gridSize, 14_gridSize, 2_gridSize, 1_gridSize, this);
+    m_car = new CarObject(-20, 14_gridSize, 2_gridSize, 1_gridSize, this);
     auto* door = new DoorObject(7_gridSize, 4_gridSize,  1_gridSize, static_cast<int>(1_gridSize * 0.4), this);
     auto* safe = new SafeObject(5_gridSize, 6_gridSize,  1_gridSize, 1_gridSize, this);
 
-    m_gameObjects.push_back(car);
+    m_gameObjects.push_back(m_car);
     m_gameObjects.push_back(door);
     m_gameObjects.push_back(safe);
 
@@ -36,6 +36,10 @@ GameEngine::GameEngine(QObject *parent) : QObject(parent) {
 
     // Связываем сигнал окончания времени из TimeManager со слотом конца игры в движке
     connect(m_timeManager, &TimeManager::timeUp, this, &GameEngine::handleTimeUp);
+    connect(m_car, &CarObject::arrivalFinished, this, [this](){
+        m_isMoving = false;
+        m_player->setIsInCar(false);
+    });
 
     // Настраиваем таймер кулдауна движения
     m_moveCooldownTimer = new QTimer(this);
@@ -53,8 +57,8 @@ void GameEngine::startLevel() {
     }
 
     QTimer::singleShot(100, this, [this]() {
-        m_carX = mapSize() / 2 - m_map->gridSize();
-        emit carXChanged(); // Кидаем сигнал: координата carX изменилась
+        int targetX = mapSize() / 2 - m_map->gridSize();
+        m_car->arrive(targetX);
     });
 }
 
@@ -77,14 +81,11 @@ void GameEngine::handleTimeUp() {
     m_isGameOver = true;
     emit isGameOverChanged(); // Сигнализируем QML, что управление пора заблочить
 
-    m_carState = 2;
-    m_carX = mapSize();
-    emit carStateChanged();
-    emit carXChanged();
-
     QRect playerRect(m_player->x(), m_player->y(), m_playerSize, m_playerSize);
-    bool inCar = playerRect.intersects(m_gameObjects[0]->rect());
+    bool inCar = playerRect.intersects(m_car->rect());
     m_player->setIsInCar(inCar);
+
+    m_car->escape(mapSize());
 
     // Проверяем, вернулся ли игрок к Машине
     if (m_player->isInCar()) {
@@ -111,7 +112,9 @@ void GameEngine::handleKeyPress(const QString &key) {
 
     QRect nextPlayerRect(nextX, nextY, m_playerSize, m_playerSize);
 
-    m_player->setIsInCar(false);
+    if (m_player->isInCar()) {
+        m_player->setIsInCar(false);
+    }
 
     for(auto* object : m_gameObjects) {
         if (nextPlayerRect.intersects(object->rect())) {
@@ -141,13 +144,4 @@ void GameEngine::handleKeyPress(const QString &key) {
 
 void GameEngine::onMoveFinished() {
     m_isMoving = false; // Время анимации вышло, открываем замок для следующего шага!
-}
-
-void GameEngine::onCarArrived() {
-    qDebug() << "C++: 2 секунды истекли! Переключаем carState в 1!";
-    m_carState = 1; // Переводим машину в режим ожидания (стоим)
-    m_isMoving = false; // Разрешаем игроку ходить
-
-    m_player->setIsInCar(false);
-    emit carStateChanged();
 }

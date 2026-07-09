@@ -130,11 +130,6 @@ Window {
                     // Передаем ссылку на C++ объект внутрь загруженного QML-файла
                     // Каждая Дверь, Сейф или Машина теперь получит свой персональный "мозг"
                     item.cppObject = modelData
-
-                    // Если это машина, прокидываем ей её анимационное состояние
-                    if (modelData.type === "car") {
-                        item.stateIndex = Qt.binding(function() { return gameEngine.carState })
-                    }
                 }
             }
         }

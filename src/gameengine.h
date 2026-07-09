@@ -5,6 +5,7 @@
 #include <QVariant>
 #include <vector>
 #include "objects/InteractableObject.h"
+#include "objects/CarObject.h"
 
 class Character;
 class GameMap;
@@ -28,9 +29,6 @@ class GameEngine : public QObject {
     Q_PROPERTY(GameMap* map READ map CONSTANT)
     Q_PROPERTY(QVariantList gameObjects READ gameObjects CONSTANT)
 
-    Q_PROPERTY(int carState READ carState NOTIFY carStateChanged)
-    Q_PROPERTY(int carX READ carX NOTIFY carXChanged)
-
 public:
     explicit GameEngine(QObject *parent = nullptr);
     ~GameEngine() override;
@@ -49,10 +47,6 @@ public:
     int moveDuration() const { return m_moveDuration; }
     int mapSize() const;
 
-    // Геттеры для Машины
-    int carState() const { return m_carState; }
-    int carX() const { return m_carX; }
-
     // Этот макрос разрешает вызывать метод C++ прямо из QML-кода кнопок
     Q_INVOKABLE void handleKeyPress(const QString &key);
     Q_INVOKABLE void startLevel();
@@ -61,12 +55,8 @@ signals:
     // Сигналы-уведомления для авто-перерисовки UI
     void isGameOverChanged();
     void gameStatusChanged();
-    void safeLootedChanged();
-    void carStateChanged();
-    void carXChanged();
 
 public slots:
-    void onCarArrived();
     void handleTimeUp();
 
 private slots:
@@ -77,10 +67,6 @@ private:
     bool m_isGameOver = false;
     QString m_gameStatus = "Доберись до СЕЙФА и вернись к МАШИНЕ!";
 
-    // Car
-    int m_carState = 0; // 0 - приезд, 1 - игра, 2 - побег
-    int m_carX = -20;
-
     // InteractableObjects
     std::vector<InteractableObject*> m_gameObjects;
 
@@ -89,6 +75,7 @@ private:
     Character* m_player = nullptr;
     // Character* m_assistant = nullptr;
     GameMap* m_map = nullptr;
+    CarObject* m_car = nullptr;
 
     int m_playerStep;
     const int m_moveDuration = 400; // Скорость шага в миллисекундах
