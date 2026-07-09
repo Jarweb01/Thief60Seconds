@@ -26,10 +26,12 @@ GameEngine::GameEngine(QObject *parent) : QObject(parent) {
     m_car = new CarObject(-20, 14_gridSize, 2_gridSize, 1_gridSize, this);
     auto* door = new DoorObject(7_gridSize, 4_gridSize,  1_gridSize, static_cast<int>(1_gridSize * 0.4), this);
     auto* safe = new SafeObject(5_gridSize, 6_gridSize,  1_gridSize, 1_gridSize, this);
+    auto* safe2 = new SafeObject(11_gridSize, 10_gridSize,  1_gridSize, 1_gridSize, this);
 
     m_gameObjects.push_back(m_car);
     m_gameObjects.push_back(door);
     m_gameObjects.push_back(safe);
+    m_gameObjects.push_back(safe2);
 
     // TIMER START
     m_timeManager = new TimeManager(this);

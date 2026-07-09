@@ -11,6 +11,6 @@ Rectangle {
         text: "СТЕНА"
         color: "white"
         anchors.centerIn: parent
-        font.pixelSize: 10
+        font.pixelSize: 8
     }
 }
