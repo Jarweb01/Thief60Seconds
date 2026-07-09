@@ -20,7 +20,13 @@ TimeManager::TimeManager(QObject *parent) : QObject(parent)
     // Связываем сигнал таймера (timeout) со слотом (нашей функцией onTimerTick)
     connect(m_timer, &QTimer::timeout, this, &TimeManager::onTimerTick);
 
-    m_timer->start(); // Запускаем обратный отсчет таймера
+    // m_timer->start(); // Запускаем обратный отсчет таймера
+}
+
+void TimeManager::start() {
+    if (m_timer && !m_timer->isActive()) {
+        m_timer->start();
+    }
 }
 
 void TimeManager::stop() {

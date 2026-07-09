@@ -37,15 +37,21 @@ GameEngine::GameEngine(QObject *parent) : QObject(parent) {
     m_moveCooldownTimer->setSingleShot(true); // Таймер сработает ровно один раз за шаг
     m_moveCooldownTimer->setInterval(m_moveDuration);    // Блокировка на n миллисекунд (длительность шага)
     connect(m_moveCooldownTimer, &QTimer::timeout, this, &GameEngine::onMoveFinished);
+    // TIMER END
+}
+
+GameEngine::~GameEngine() {}
+
+void GameEngine::startLevel() {
+    if (m_timeManager) {
+        m_timeManager->start();
+    }
 
     QTimer::singleShot(100, this, [this]() {
         m_carX = mapSize() / 2 - m_map->gridSize();
         emit carXChanged(); // Кидаем сигнал: координата carX изменилась
     });
-    // TIMER END
 }
-
-GameEngine::~GameEngine() {}
 
 int GameEngine::mapSize() const {
     return m_map->mapSize();

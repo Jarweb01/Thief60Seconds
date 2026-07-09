@@ -13,7 +13,9 @@ public:
 
     int timeLeft() const { return m_timeLeft; }
     bool isTimeRunningOut() const { return m_timeLeft < m_panicThreshold && m_timeLeft > 0; }
+
     void stop();
+    void start();
 
 signals:
     void timeLeftChanged();
@@ -26,6 +28,6 @@ private slots:
 private:
     int m_timeLeft;
     QTimer * m_timer = nullptr;
-    const int m_panicThreshold = 28;
+    const int m_panicThreshold = 20;
 };
 

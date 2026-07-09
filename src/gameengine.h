@@ -68,6 +68,7 @@ public:
 
     // Этот макрос разрешает вызывать метод C++ прямо из QML-кода кнопок
     Q_INVOKABLE void handleKeyPress(const QString &key);
+    Q_INVOKABLE void startLevel();
 
 signals:
     // Сигналы-уведомления для авто-перерисовки UI

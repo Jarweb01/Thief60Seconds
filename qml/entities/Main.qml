@@ -39,6 +39,53 @@ Window {
 
         GameGrid {}
 
+        // КНОПКА СТАРТА ИГРЫ
+        Rectangle {
+            id: startButton
+
+            // Центрируем кнопку строго посреди игрового поля
+            anchors.centerIn: parent
+            width: 200
+            height: 60
+            radius: 8
+
+            // Стильный темно-зеленый цвет
+            color: "#27ae60"
+            border.color: "#2ecc71"
+            border.width: 2
+
+            // Эффект плавного исчезновения при старте
+            Behavior on opacity { NumberAnimation { duration: 250 } }
+
+            Text {
+                anchors.centerIn: parent
+                text: "НАЧАТЬ ИГРУ"
+                color: "white"
+                font.bold: true
+                font.pixelSize: 18
+            }
+
+            // mouseArea делает прямоугольник кликабельным
+            MouseArea {
+                anchors.fill: parent
+                // Меняем курсор на "руку" при наведении
+                cursorShape: Qt.PointingHandCursor
+
+                onClicked: {
+                    console.log("QML: Нажата кнопка СТАРТ! Пинаем C++ движок...");
+
+                    // 1. Вызываем наш новый плюсовый метод
+                    gameEngine.startLevel();
+
+                    // 2. Делаем кнопку невидимой (сработает плавная анимация затухания)
+                    startButton.opacity = 0
+
+                    // 3. Отключаем кликабельность, чтобы нельзя было прожать повторно
+                    startButton.visible = false
+                }
+            }
+        }
+
         Player {
             id: player
             x: gameEngine.player.x
