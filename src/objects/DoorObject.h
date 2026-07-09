@@ -30,8 +30,8 @@ private slots:
 private:
     double m_progress = 0.0;
     bool m_isBreaking = false;
-    QTimer* m_breakTimer = nullptr;
 
+    QTimer* m_breakTimer = nullptr;
     Character* m_currentActor = nullptr;
 
     int m_currentBreakTime = 0;

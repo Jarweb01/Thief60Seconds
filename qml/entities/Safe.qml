@@ -22,4 +22,32 @@ Rectangle {
         anchors.centerIn: parent
         font.pixelSize: 10
     }
+
+    // ИНДИКАТОР ВЗЛОМА СЕЙФА
+    Rectangle {
+        id: progressBarBg
+
+        visible: safe.cppObject ? safe.cppObject.isBreaking : false
+
+        // Позиционируем строго НАД сейфом
+        anchors.bottom: parent.top
+        anchors.bottomMargin: 4
+        anchors.horizontalCenter: parent.horizontalCenter
+
+        width: parent.width
+        height: 6
+        radius: 3
+        color: "#34495e" // Темно-серый фон
+
+        Rectangle {
+            id: progressFill
+            anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            radius: parent.radius
+            color: "#f39c12" // Строительный оранжево-желтый цвет пиления сейфа
+
+            width: parent.width * (safe.cppObject ? safe.cppObject.progress : 0.0)
+        }
+    }
 }

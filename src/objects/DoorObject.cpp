@@ -5,7 +5,7 @@
 DoorObject::DoorObject(int x, int y, int w, int h, QObject * parent)
     : InteractableObject(x, y, w, h, "door", true, parent) {
     m_breakTimer = new QTimer(this);
-    m_breakTimer->setInterval(50);
+    m_breakTimer->setInterval(TIMER_INTERVAL);
     connect(m_breakTimer, &QTimer::timeout, this, &DoorObject::onLockPickTick);
 }
 
