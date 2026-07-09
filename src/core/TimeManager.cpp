@@ -8,7 +8,7 @@ TimeManager::TimeManager(QObject *parent) : QObject(parent)
     std::mt19937 gen(rd()); // Инициализируем стандартный генератор Вихрь Мерсенна
 
     // 2. Задаем диапазон распределения
-    std::uniform_int_distribution<> distr(30, 32);
+    std::uniform_int_distribution<> distr(40, 50);
 
     // 3. Присваиваем случайное число нашей переменной времени
     m_timeLeft = distr(gen);

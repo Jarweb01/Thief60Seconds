@@ -1,6 +1,7 @@
 #include "Character.h"
 
-Character::Character(int startX, int startY, QObject *parent): QObject(parent), m_x(startX), m_y(startY) {}
+Character::Character(int startX, int startY, QObject *parent)
+    : QObject(parent), m_x(startX), m_y(startY), m_isBusy(false) {}
 
 void Character::setX(int newX) {
     if (m_x == newX) return;

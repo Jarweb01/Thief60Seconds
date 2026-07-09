@@ -101,7 +101,7 @@ void GameEngine::handleTimeUp() {
 
 // 3. ОБРАБОТКА НАЖАТИЯ КНОПОК (Вызывается из JS-кода в QML)
 void GameEngine::handleKeyPress(const QString &key) {
-    if (m_isGameOver || m_isMoving) return;
+    if (m_isGameOver || m_isMoving || m_player->isBusy()) return;
 
     int nextX = m_player->x();
     int nextY = m_player->y();

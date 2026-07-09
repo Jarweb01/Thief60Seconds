@@ -22,4 +22,31 @@ Rectangle {
         anchors.centerIn: parent
         font.pixelSize: 9
     }
+
+    // ИНДИКАТОР ВЗЛОМА (Шкала прогресса)
+    Rectangle {
+        id: progressBarBg
+
+        visible: door.cppObject ? door.cppObject.isBreaking : false
+
+        anchors.bottom: parent.top
+        anchors.bottomMargin: 4
+        anchors.horizontalCenter: parent.horizontalCenter
+
+        width: parent.width
+        height: 6
+        radius: 3
+        color: "#34495e"
+
+        Rectangle {
+            id: progressFill
+            anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            radius: parent.radius
+            color: "#1abc9c"
+
+            width: parent.width * (door.cppObject ? door.cppObject.progress : 0.0)
+        }
+    }
 }

@@ -26,6 +26,8 @@ public:
 
     virtual bool onCollision(Character* actor) = 0;
 
+    static constexpr int TIMER_INTERVAL = 50;
+
 signals:
     void stateActiveChanged();
 

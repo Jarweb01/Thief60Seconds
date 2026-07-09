@@ -29,6 +29,9 @@ public:
 
     int size() const { return m_size; }
 
+    bool isBusy() const { return m_isBusy; }
+    void setBusy(bool busy) { m_isBusy = busy; }
+
 signals:
     void positionChanged();
     void isInCarChanged();
@@ -40,4 +43,5 @@ private:
     int m_size = 16;
     int m_moveDuration = 300;
     bool m_isInCar = true;
+    bool m_isBusy = false;
 };
