@@ -111,6 +111,8 @@ void GameEngine::handleKeyPress(const QString &key) {
 
     QRect nextPlayerRect(nextX, nextY, m_playerSize, m_playerSize);
 
+    m_player->setIsInCar(false);
+
     for(auto* object : m_gameObjects) {
         if (nextPlayerRect.intersects(object->rect())) {
             bool isBlocking = object->onCollision(m_player);
@@ -135,16 +137,6 @@ void GameEngine::handleKeyPress(const QString &key) {
 
     m_isMoving = true;             // Закрываем замок для кнопок
     m_moveCooldownTimer->start(); // Запускаем отсчет n миллисекунд
-
-    m_player->setIsInCar(false);
-
-    QRect currentPlayerRect(m_player->x(), m_player->y(), m_playerSize, m_playerSize);
-
-    for (auto* object : m_gameObjects) {
-        if (currentPlayerRect.intersects(object->rect())) {
-            object->onCollision(m_player);
-        }
-    }
 }
 
 void GameEngine::onMoveFinished() {
