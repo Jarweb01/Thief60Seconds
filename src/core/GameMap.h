@@ -19,7 +19,7 @@ class GameMap: public QObject
     Q_PROPERTY(int mapSize READ mapSize CONSTANT)
 
 public:
-    explicit GameMap(QObject* parent = nullptr);
+    explicit GameMap(int level = 1, QObject* parent = nullptr);
 
     QVariantList walls() const;
     int gridSize() const { return m_gridSize; }

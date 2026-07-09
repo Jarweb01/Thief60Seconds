@@ -30,7 +30,7 @@ class GameEngine : public QObject {
     Q_PROPERTY(QVariantList gameObjects READ gameObjects CONSTANT)
 
 public:
-    explicit GameEngine(QObject *parent = nullptr);
+    explicit GameEngine(int level = 1, QObject *parent = nullptr);
     ~GameEngine() override;
 
     Character* player() const { return m_player; }

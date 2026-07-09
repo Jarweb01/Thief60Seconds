@@ -16,22 +16,50 @@ constexpr int operator"" _gridSize(unsigned long long int cells) {
 }
 
 // 1. КОНСТРУКТОР: вызывается в момент создания игры в памяти
-GameEngine::GameEngine(QObject *parent) : QObject(parent) {
-    m_map = new GameMap(this);
+GameEngine::GameEngine(int level, QObject *parent) : QObject(parent) {
+    m_map = new GameMap(level, this);
     m_player = new Character(365, 667, this);
     m_player->setIsInCar(true);
     // m_assistant = new Character(7_grid, 14_grid, this);
     m_playerStep = m_map->gridSize();
 
     m_car = new CarObject(-20, 14_gridSize, 2_gridSize, 1_gridSize, this);
-    auto* door = new DoorObject(7_gridSize, 4_gridSize,  1_gridSize, static_cast<int>(1_gridSize * 0.4), this);
-    auto* safe = new SafeObject(5_gridSize, 6_gridSize,  1_gridSize, 1_gridSize, this);
-    auto* safe2 = new SafeObject(11_gridSize, 10_gridSize,  1_gridSize, 1_gridSize, this);
-
     m_gameObjects.push_back(m_car);
-    m_gameObjects.push_back(door);
-    m_gameObjects.push_back(safe);
-    m_gameObjects.push_back(safe2);
+
+    if (level == 1) {
+        auto* door = new DoorObject(7_gridSize, 4_gridSize,  1_gridSize, static_cast<int>(1_gridSize * 0.4), this);
+        auto* safe1 = new SafeObject(5_gridSize, 6_gridSize,  1_gridSize, 1_gridSize, this);
+        auto* safe2 = new SafeObject(11_gridSize, 10_gridSize,  1_gridSize, 1_gridSize, this);
+
+        m_gameObjects.push_back(door);
+        m_gameObjects.push_back(safe1);
+        m_gameObjects.push_back(safe2);
+    } else {
+        // Внутренняя ДВЕРЬ №1 (Вход в левую комнату, X = 5)
+        auto* door1 = new DoorObject(5_gridSize, 7_gridSize, 1_gridSize, 1_gridSize, this);
+
+        // Внутренняя ДВЕРЬ №2 (Вход в правую комнату, X = 10)
+        auto* door2 = new DoorObject(10_gridSize, 7_gridSize, 1_gridSize, 1_gridSize, this);
+
+        // ДОБАВИЛИ: ПАРАДНАЯ ДВЕРЬ №3 (Вход с улицы в банк, X = 7, Y = 12)
+        auto* door3 = new DoorObject(7_gridSize, 12_gridSize, 2_gridSize, 1_gridSize, this); // Сделаем её шириной в 2 клетки (2_gridSize)!
+
+        // СЕЙФ №1 (Левое крыло)
+        auto* safe1 = new SafeObject(4_gridSize, 4_gridSize, 1_gridSize, 1_gridSize, this);
+
+        // СЕЙФ №2 (Правое крыло)
+        auto* safe2 = new SafeObject(12_gridSize, 4_gridSize, 1_gridSize, 1_gridSize, this);
+
+        // Пушим все три двери и сейфы в вектор объектов
+        m_gameObjects.push_back(m_car);
+        m_gameObjects.push_back(door1);
+        m_gameObjects.push_back(door2);
+        m_gameObjects.push_back(door3); // Не забываем запушить третью дверь!
+        m_gameObjects.push_back(safe1);
+        m_gameObjects.push_back(safe2);
+    }
+
+
 
     // TIMER START
     m_timeManager = new TimeManager(this);

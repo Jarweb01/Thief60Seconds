@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
 
-    GameEngine gameEngine;
+    GameEngine gameEngine(2);
     engine.rootContext()->setContextProperty("gameEngine", &gameEngine);
 
 
