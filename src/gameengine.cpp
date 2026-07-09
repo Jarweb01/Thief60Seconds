@@ -136,13 +136,15 @@ void GameEngine::handleKeyPress(const QString &key) {
     m_isMoving = true;             // Закрываем замок для кнопок
     m_moveCooldownTimer->start(); // Запускаем отсчет n миллисекунд
 
+    m_player->setIsInCar(false);
+
     QRect currentPlayerRect(m_player->x(), m_player->y(), m_playerSize, m_playerSize);
 
-    bool isInCar = currentPlayerRect.intersects(m_gameObjects[0]->rect());
-    m_player->setIsInCar(isInCar);
-
-    m_doorLocked = m_gameObjects[1]->isStateActive();
-    emit doorLockedChanged();
+    for (auto* object : m_gameObjects) {
+        if (currentPlayerRect.intersects(object->rect())) {
+            object->onCollision(m_player);
+        }
+    }
 }
 
 void GameEngine::onMoveFinished() {

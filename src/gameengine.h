@@ -17,7 +17,6 @@ class GameEngine : public QObject {
     // Регистрируем свойства для QML
     Q_PROPERTY(TimeManager* timeManager READ timeManager CONSTANT)
     Q_PROPERTY(bool isGameOver READ isGameOver NOTIFY isGameOverChanged)
-    Q_PROPERTY(bool doorLocked READ doorLocked NOTIFY doorLockedChanged)
     Q_PROPERTY(QString gameStatus READ gameStatus NOTIFY gameStatusChanged)
     Q_PROPERTY(int moveDuration READ moveDuration CONSTANT)
 
@@ -46,7 +45,6 @@ public:
     QVariantList gameObjects() const;
 
     bool isGameOver() const { return m_isGameOver; }
-    bool doorLocked() const { return m_doorLocked; }
     QString gameStatus() const { return m_gameStatus; }
     int moveDuration() const { return m_moveDuration; }
     int mapSize() const;
@@ -62,7 +60,6 @@ public:
 signals:
     // Сигналы-уведомления для авто-перерисовки UI
     void isGameOverChanged();
-    void doorLockedChanged();
     void gameStatusChanged();
     void safeLootedChanged();
     void carStateChanged();
@@ -78,7 +75,6 @@ private slots:
 private:
     // Внутреннее состояние игры (State)
     bool m_isGameOver = false;
-    bool m_doorLocked = true;
     QString m_gameStatus = "Доберись до СЕЙФА и вернись к МАШИНЕ!";
 
     // Car
