@@ -4,6 +4,7 @@
 #include <QString>
 #include <QVariant>
 #include <vector>
+#include "objects/InteractableObject.h"
 
 class Character;
 class GameMap;

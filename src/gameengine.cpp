@@ -1,11 +1,11 @@
 #include "gameengine.h"
-#include "GameMap.h"
-#include "Character.h"
-#include "InteractableObject.h"
-#include "TimeManager.h"
-#include "DoorObject.h"
-#include "SafeObject.h"
-#include "CarObject.h"
+#include "core/GameMap.h"
+#include "core/TimeManager.h"
+#include "entities/Character.h"
+#include "objects/InteractableObject.h"
+#include "objects/DoorObject.h"
+#include "objects/SafeObject.h"
+#include "objects/CarObject.h"
 #include <algorithm> // Нужен для функций std::max и std::min (ограничители движения)
 #include <QVariantMap>
 #include <QDebug>

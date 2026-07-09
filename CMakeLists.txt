@@ -12,20 +12,26 @@ qt_add_executable(appThief60Seconds
     main.cpp
     src/gameengine.h
     src/gameengine.cpp
-    src/Character.h
-    src/Character.cpp
-    src/GameMap.h
-    src/GameMap.cpp
-    src/InteractableObject.h
-    src/InteractableObject.cpp
-    src/TimeManager.h
-    src/TimeManager.cpp
-    src/DoorObject.h
-    src/DoorObject.cpp
-    src/SafeObject.h
-    src/SafeObject.cpp
-    src/CarObject.h
-    src/CarObject.cpp
+
+    # Core
+    src/core/GameMap.h
+    src/core/GameMap.cpp
+    src/core/TimeManager.h
+    src/core/TimeManager.cpp
+
+    # Entities
+    src/entities/Character.h
+    src/entities/Character.cpp
+
+    # Objects
+    src/objects/InteractableObject.h
+    src/objects/InteractableObject.cpp
+    src/objects/DoorObject.h
+    src/objects/DoorObject.cpp
+    src/objects/SafeObject.h
+    src/objects/SafeObject.cpp
+    src/objects/CarObject.h
+    src/objects/CarObject.cpp
 )
 
 qt_add_qml_module(appThief60Seconds
@@ -56,6 +62,8 @@ set_target_properties(appThief60Seconds PROPERTIES
 target_link_libraries(appThief60Seconds
     PRIVATE Qt6::Quick
 )
+
+target_include_directories(appThief60Seconds PRIVATE src)
 
 include(GNUInstallDirs)
 install(TARGETS appThief60Seconds
