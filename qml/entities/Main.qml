@@ -96,12 +96,6 @@ Window {
             Behavior on opacity { NumberAnimation { duration: 100 } }
         }
 
-        // Машина
-        Car {
-            id: car
-            stateIndex: gameEngine.carState
-        }
-
         // СТЕНЫ
         Repeater {
             model: gameEngine.map.walls
@@ -113,15 +107,38 @@ Window {
             }
         }
 
-        // ДВЕРЬ
-        Door {
-            id: door
+        // ДИНАМИЧЕСКИЕ ИГРОВЫЕ ОБЪЕКТЫ (Машина, Дверь, Сейф)
+        Repeater {
+            // Читаем QVariantList вектор из C++
+            model: gameEngine.gameObjects
+
+            // Loader — это стандартный компонент QML, который умеет динамически
+            // загружать разные файлы (.qml) в зависимости от условий
+            Loader {
+                id: objectLoader
+
+                // Настраиваем логику выбора правильного файла по текстовому типу из C++
+                source: {
+                    if (modelData.type === "car")  return "Car.qml"
+                    if (modelData.type === "door") return "Door.qml"
+                    if (modelData.type === "safe") return "Safe.qml"
+                    return ""
+                }
+
+                // Связываем динамически созданный объект со свойствами из C++
+                onLoaded: {
+                    // Передаем ссылку на C++ объект внутрь загруженного QML-файла
+                    // Каждая Дверь, Сейф или Машина теперь получит свой персональный "мозг"
+                    item.cppObject = modelData
+
+                    // Если это машина, прокидываем ей её анимационное состояние
+                    if (modelData.type === "car") {
+                        item.stateIndex = Qt.binding(function() { return gameEngine.carState })
+                    }
+                }
+            }
         }
 
-        // СЕЙФ С ДОБЫЧЕЙ
-        Safe {
-            id: safe
-        }
 
         // Логика управления (чистый JS)
         Keys.onPressed: (event) => {

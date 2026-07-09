@@ -6,12 +6,13 @@ Rectangle {
     border.color: "#00d2d3"
     border.width: 2
 
-    y: gameEngine.car.rect.y
-    width: gameEngine.car.rect.width
-    height: gameEngine.car.rect.height
+    property var cppObject: null
+
+    y: cppObject ? cppObject.rect.y : 0
+    width: cppObject ? cppObject.rect.width : 0
+    height: cppObject ? cppObject.rect.height : 0
 
     property int stateIndex: 0
-
     x: gameEngine.carX
 
     // Плавная анимация изменения координаты X ровно на 2 секунды (2000 мс)

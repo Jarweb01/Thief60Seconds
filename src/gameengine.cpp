@@ -27,10 +27,6 @@ GameEngine::GameEngine(QObject *parent) : QObject(parent) {
     auto* door = new DoorObject(7_gridSize, 4_gridSize,  1_gridSize, static_cast<int>(1_gridSize * 0.4), this);
     auto* safe = new SafeObject(5_gridSize, 6_gridSize,  1_gridSize, 1_gridSize, this);
 
-    m_carRef = car;
-    m_doorRef = door;
-    m_safeRef = safe;
-
     m_gameObjects.push_back(car);
     m_gameObjects.push_back(door);
     m_gameObjects.push_back(safe);
@@ -66,6 +62,14 @@ int GameEngine::mapSize() const {
     return m_map->mapSize();
 }
 
+QVariantList GameEngine::gameObjects() const {
+    QVariantList list;
+    for (auto* obj : m_gameObjects) {
+        list.append(QVariant::fromValue(obj));
+    }
+    return list;
+}
+
 // СЕКУНДНЫЙ ТИК ТАЙМЕРА (асинхронно уменьшает время)
 void GameEngine::handleTimeUp() {
     if (m_isGameOver) return; // Если игра окончена, ничего не делаем
@@ -79,7 +83,7 @@ void GameEngine::handleTimeUp() {
     emit carXChanged();
 
     QRect playerRect(m_player->x(), m_player->y(), m_playerSize, m_playerSize);
-    bool inCar = playerRect.intersects(m_carRef->rect());
+    bool inCar = playerRect.intersects(m_gameObjects[0]->rect());
     m_player->setIsInCar(inCar);
 
     // Проверяем, вернулся ли игрок к Машине
@@ -134,10 +138,10 @@ void GameEngine::handleKeyPress(const QString &key) {
 
     QRect currentPlayerRect(m_player->x(), m_player->y(), m_playerSize, m_playerSize);
 
-    bool isInCar = currentPlayerRect.intersects(m_carRef->rect());
+    bool isInCar = currentPlayerRect.intersects(m_gameObjects[0]->rect());
     m_player->setIsInCar(isInCar);
 
-    m_doorLocked = m_doorRef->isStateActive();
+    m_doorLocked = m_gameObjects[1]->isStateActive();
     emit doorLockedChanged();
 }
 

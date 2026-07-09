@@ -27,18 +27,10 @@ class GameEngine : public QObject {
 
     // Мосты для Стен
     Q_PROPERTY(GameMap* map READ map CONSTANT)
-
-    // Мосты для Двери
-    Q_PROPERTY(InteractableObject* door READ door CONSTANT)
-
-    // Мосты для Машины
-    Q_PROPERTY(InteractableObject* car READ car CONSTANT)
+    Q_PROPERTY(QVariantList gameObjects READ gameObjects CONSTANT)
 
     Q_PROPERTY(int carState READ carState NOTIFY carStateChanged)
     Q_PROPERTY(int carX READ carX NOTIFY carXChanged)
-
-    // Мосты для Сейфа
-    Q_PROPERTY(InteractableObject* safe READ safe CONSTANT)
 
 public:
     explicit GameEngine(QObject *parent = nullptr);
@@ -51,22 +43,17 @@ public:
 
     // Геттеры для чтения данных из QML
     TimeManager* timeManager() const { return m_timeManager; }
+    QVariantList gameObjects() const;
+
     bool isGameOver() const { return m_isGameOver; }
     bool doorLocked() const { return m_doorLocked; }
     QString gameStatus() const { return m_gameStatus; }
     int moveDuration() const { return m_moveDuration; }
     int mapSize() const;
 
-    // Геттеры для Двери
-    InteractableObject* door() const { return m_doorRef; }
-
     // Геттеры для Машины
-    InteractableObject* car() const { return m_carRef; }
     int carState() const { return m_carState; }
     int carX() const { return m_carX; }
-
-    // Геттеры для Сейфа
-    InteractableObject* safe() const { return m_safeRef; }
 
     // Этот макрос разрешает вызывать метод C++ прямо из QML-кода кнопок
     Q_INVOKABLE void handleKeyPress(const QString &key);
@@ -95,16 +82,11 @@ private:
     QString m_gameStatus = "Доберись до СЕЙФА и вернись к МАШИНЕ!";
 
     // Car
-    // InteractableObject* m_car = nullptr;
     int m_carState = 0; // 0 - приезд, 1 - игра, 2 - побег
     int m_carX = -20;
 
     // InteractableObjects
     std::vector<InteractableObject*> m_gameObjects;
-
-    InteractableObject* m_carRef = nullptr;
-    InteractableObject* m_doorRef = nullptr;
-    InteractableObject* m_safeRef = nullptr;
 
     // Константы размеров
     // Player
