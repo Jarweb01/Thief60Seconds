@@ -3,6 +3,8 @@
 #include <QRect>
 #include <QString>
 
+class Character;
+
 class InteractableObject : public QObject
 {
     Q_OBJECT
@@ -14,11 +16,15 @@ class InteractableObject : public QObject
 public:
     explicit InteractableObject(int x, int y, int w, int h, const QString & type, bool state, QObject *parent = nullptr);
 
+    virtual ~InteractableObject() override = default;
+
     QRect rect() const { return m_rect; }
     QString type() const { return m_type; }
 
     bool isStateActive() const { return m_isStateActive; }
     void setIsStateActive(bool active);
+
+    virtual bool onCollision(Character* actor) = 0;
 
 signals:
     void stateActiveChanged();

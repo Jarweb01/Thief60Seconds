@@ -20,6 +20,12 @@ qt_add_executable(appThief60Seconds
     src/InteractableObject.cpp
     src/TimeManager.h
     src/TimeManager.cpp
+    src/DoorObject.h
+    src/DoorObject.cpp
+    src/SafeObject.h
+    src/SafeObject.cpp
+    src/CarObject.h
+    src/CarObject.cpp
 )
 
 qt_add_qml_module(appThief60Seconds

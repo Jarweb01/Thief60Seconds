@@ -3,6 +3,9 @@
 #include "Character.h"
 #include "InteractableObject.h"
 #include "TimeManager.h"
+#include "DoorObject.h"
+#include "SafeObject.h"
+#include "CarObject.h"
 #include <algorithm> // Нужен для функций std::max и std::min (ограничители движения)
 #include <QVariantMap>
 #include <QDebug>
@@ -15,16 +18,22 @@ constexpr int operator"" _gridSize(unsigned long long int cells) {
 // 1. КОНСТРУКТОР: вызывается в момент создания игры в памяти
 GameEngine::GameEngine(QObject *parent) : QObject(parent) {
     m_map = new GameMap(this);
-
     m_player = new Character(365, 667, this);
     m_player->setIsInCar(true);
     // m_assistant = new Character(7_grid, 14_grid, this);
-
     m_playerStep = m_map->gridSize();
 
-    m_car = new InteractableObject(7_gridSize, 14_gridSize, 2_gridSize, 1_gridSize, "car",  false, this);
-    m_door = new InteractableObject(7_gridSize, 4_gridSize,  1_gridSize, static_cast<int>(1_gridSize * 0.4), "door", true, this);
-    m_safe = new InteractableObject(5_gridSize, 6_gridSize,  1_gridSize, 1_gridSize, "safe", false, this);
+    auto* car = new CarObject(7_gridSize, 14_gridSize, 2_gridSize, 1_gridSize, this);
+    auto* door = new DoorObject(7_gridSize, 4_gridSize,  1_gridSize, static_cast<int>(1_gridSize * 0.4), this);
+    auto* safe = new SafeObject(5_gridSize, 6_gridSize,  1_gridSize, 1_gridSize, this);
+
+    m_carRef = car;
+    m_doorRef = door;
+    m_safeRef = safe;
+
+    m_gameObjects.push_back(car);
+    m_gameObjects.push_back(door);
+    m_gameObjects.push_back(safe);
 
     // TIMER START
     m_timeManager = new TimeManager(this);
@@ -70,7 +79,7 @@ void GameEngine::handleTimeUp() {
     emit carXChanged();
 
     QRect playerRect(m_player->x(), m_player->y(), m_playerSize, m_playerSize);
-    bool inCar = playerRect.intersects(m_car->rect());
+    bool inCar = playerRect.intersects(m_carRef->rect());
     m_player->setIsInCar(inCar);
 
     // Проверяем, вернулся ли игрок к Машине
@@ -98,18 +107,14 @@ void GameEngine::handleKeyPress(const QString &key) {
 
     QRect nextPlayerRect(nextX, nextY, m_playerSize, m_playerSize);
 
-    // ПРОВЕРКА СЕЙФА (Действует как стена + триггер взлома)
-    // Проверяем, натыкается ли СЛЕДУЮЩИЙ шаг вора на координаты сейфа
-    if(nextPlayerRect.intersects(m_safe->rect())) {
+    for(auto* object : m_gameObjects) {
+        if (nextPlayerRect.intersects(object->rect())) {
+            bool isBlocking = object->onCollision(m_player);
 
-        // Если сейф ещё не был взломан — взламываем!
-        if(!m_safe->isStateActive()){
-            m_safe->setIsStateActive(true);
-
-            emit safeLootedChanged();
+            if (isBlocking) {
+                return;
+            }
         }
-
-        return;
     }
 
     // Проверяем столкновение со СТЕНОЙ
@@ -129,17 +134,11 @@ void GameEngine::handleKeyPress(const QString &key) {
 
     QRect currentPlayerRect(m_player->x(), m_player->y(), m_playerSize, m_playerSize);
 
-    bool isInCar = currentPlayerRect.intersects(m_car->rect());
+    bool isInCar = currentPlayerRect.intersects(m_carRef->rect());
     m_player->setIsInCar(isInCar);
 
-    // Проверяем касание ДВЕРИ
-    if (currentPlayerRect.intersects(m_door->rect())) {
-        if (m_door->isStateActive()) {
-            m_door->setIsStateActive(false);
-            m_doorLocked = false;
-            emit doorLockedChanged(); // Дверь в QML мгновенно зеленеет
-        }
-    }
+    m_doorLocked = m_doorRef->isStateActive();
+    emit doorLockedChanged();
 }
 
 void GameEngine::onMoveFinished() {

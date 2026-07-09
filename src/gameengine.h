@@ -3,6 +3,7 @@
 #include <QTimer>
 #include <QString>
 #include <QVariant>
+#include <vector>
 
 class Character;
 class GameMap;
@@ -56,15 +57,15 @@ public:
     int mapSize() const;
 
     // Геттеры для Двери
-    InteractableObject* door() const { return m_door; }
+    InteractableObject* door() const { return m_doorRef; }
 
     // Геттеры для Машины
-    InteractableObject* car() const { return m_car; }
+    InteractableObject* car() const { return m_carRef; }
     int carState() const { return m_carState; }
     int carX() const { return m_carX; }
 
     // Геттеры для Сейфа
-    InteractableObject* safe() const { return m_safe; }
+    InteractableObject* safe() const { return m_safeRef; }
 
     // Этот макрос разрешает вызывать метод C++ прямо из QML-кода кнопок
     Q_INVOKABLE void handleKeyPress(const QString &key);
@@ -93,16 +94,16 @@ private:
     QString m_gameStatus = "Доберись до СЕЙФА и вернись к МАШИНЕ!";
 
     // Car
-    InteractableObject* m_car = nullptr;
+    // InteractableObject* m_car = nullptr;
     int m_carState = 0; // 0 - приезд, 1 - игра, 2 - побег
     int m_carX = -20;
 
-    // Door
-    InteractableObject* m_door = nullptr;
+    // InteractableObjects
+    std::vector<InteractableObject*> m_gameObjects;
 
-    // Safe
-    InteractableObject* m_safe = nullptr;
-
+    InteractableObject* m_carRef = nullptr;
+    InteractableObject* m_doorRef = nullptr;
+    InteractableObject* m_safeRef = nullptr;
 
     // Константы размеров
     // Player
