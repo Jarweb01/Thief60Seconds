@@ -20,7 +20,10 @@ GameEngine::GameEngine(int level, QObject *parent) : QObject(parent) {
     m_map = new GameMap(level, this);
     m_player = new Character(365, 667, this);
     m_player->setIsInCar(true);
-    // m_assistant = new Character(7_grid, 14_grid, this);
+
+    m_assistant = new Character(415, 667, this);
+    m_assistant->setIsInCar(true);
+
     m_playerStep = m_map->gridSize();
 
     m_car = new CarObject(-20, 14_gridSize, 2_gridSize, 1_gridSize, this);
@@ -69,6 +72,20 @@ GameEngine::GameEngine(int level, QObject *parent) : QObject(parent) {
     connect(m_car, &CarObject::arrivalFinished, this, [this](){
         m_isMoving = false;
         m_player->setIsInCar(false);
+
+        // ВЫСАЖИВАЕМ НАПАРНИКА
+        m_assistant->setIsInCar(false);
+
+        // ЗАПУСКАЕМ ТРИ АВТО-ШАГА НАПРАВО (setTimeout стиль)
+        // 1-й шаг через 500 миллисекунд
+        QTimer::singleShot(500, this, [this]() {
+            m_assistant->setX(m_assistant->x() + m_playerStep);
+        });
+
+        // 2-й шаг через 1000 миллисекунд
+        QTimer::singleShot(1000, this, [this]() {
+            m_assistant->setX(m_assistant->x() + m_playerStep);
+        });
     });
 
     // Настраиваем таймер кулдауна движения

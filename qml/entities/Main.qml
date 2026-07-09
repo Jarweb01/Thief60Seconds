@@ -96,6 +96,21 @@ Window {
             Behavior on opacity { NumberAnimation { duration: 100 } }
         }
 
+        // НАПАРНИК (Ассистент)
+        Player {
+            id: assistant
+            x: gameEngine.assistant.x
+            y: gameEngine.assistant.y
+
+            // Делаем его полупрозрачным или меняем цвет, чтобы отличить от главного вора
+            opacity: gameEngine.assistant.isInCar ? 0 : 0.7
+
+            Behavior on opacity { NumberAnimation { duration: 100 } }
+
+            // Если внутри вашего Player.qml цвет задан через property,
+            // можно перекрасить его, например: color: "#3498db" (синий)
+        }
+
         // СТЕНЫ
         Repeater {
             model: gameEngine.map.walls

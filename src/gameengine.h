@@ -23,7 +23,7 @@ class GameEngine : public QObject {
 
     // Координаты игрока
     Q_PROPERTY(Character* player READ player CONSTANT)
-    // Q_PROPERTY(Character* assistant READ assistant CONSTANT)
+    Q_PROPERTY(Character* assistant READ assistant CONSTANT)
 
     // Мосты для Стен
     Q_PROPERTY(GameMap* map READ map CONSTANT)
@@ -34,7 +34,7 @@ public:
     ~GameEngine() override;
 
     Character* player() const { return m_player; }
-    // Character* assistant() const { return m_assistant; }
+    Character* assistant() const { return m_assistant; }
 
     GameMap* map() const { return m_map; }
 
@@ -73,7 +73,7 @@ private:
     // Константы размеров
     // Player
     Character* m_player = nullptr;
-    // Character* m_assistant = nullptr;
+    Character* m_assistant = nullptr;
     GameMap* m_map = nullptr;
     CarObject* m_car = nullptr;
 
